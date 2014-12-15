@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+html, body, #map-canvas {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+</style>
+<script type="text/javascript"
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBCvKCMy7h_YhBhH7oSl1lXKuWjS-jPhbg">
+	    </script>
+<script type="text/javascript">
+	      function initialize() {
+	        var mapOptions = {
+	          center: { lat: 37.047764, lng: -79.639314},
+	          zoom: 14,
+	          disableDefaultUI: true,
+	          styles: [{"featureType":"water","stylers":[{"color":"#46bcec"},{"visibility":"on"}]},{"featureType":"landscape","stylers":[{"color":"#f2f2f2"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#444444"}]},{"featureType":"transit","stylers":[{"visibility":"off"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]}]
+	        };
+	        
+	        var map = new google.maps.Map(document.getElementById('map-canvas'),
+	            mapOptions);
+	      }
+	      google.maps.event.addDomListener(window, 'load', initialize);
+	    </script>
+</head>
+<body>
+	<div id="sidebar"></div>
+	<div id="map-canvas"></div>
+
+</body>
+</html>

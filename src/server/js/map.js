@@ -5,7 +5,14 @@ function initialize() {
 			lng : -79.639314
 		},
 		zoom : 14,
-		disableDefaultUI : true,
+		
+		panControl : true,
+		zoomControl : true,
+		mapTypeControl : false,
+		scaleControl : true,
+		streetViewControl : false,
+		overviewMapControl : false,
+		
 		styles : [ {
 			"featureType" : "water",
 			"stylers" : [ {

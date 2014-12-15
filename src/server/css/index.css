@@ -1,0 +1,15 @@
+html, body, #map-canvas, #sidebar {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#map-canvas {
+	width: 80%;
+	float: right;
+}
+
+#sidebar {
+	width: 20%;
+	float: left;
+}

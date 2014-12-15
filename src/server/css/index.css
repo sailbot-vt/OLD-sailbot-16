@@ -1,36 +1,43 @@
-@import url('http://fonts.googleapis.com/css?family=Open+Sans:400,300,600');
+@import
+	url('http://fonts.googleapis.com/css?Roboto:400,300,500');
 
 html, body, #map-canvas, #sidebar {
 	height: 100%;
 	margin: 0;
 	padding: 0;
-	font-family: 'Open Sans', sans-serif;
+	font-family: 'Roboto', sans-serif;
 }
 
 #map-canvas {
-	width: 80%;
+	width: 70%;
 	float: right;
 }
 
 #sidebar {
-	width: calc(20% - 40px);
+	width: calc(30% - 40px);
 	height: calc(100% - 40px);
 	float: left;
-    padding:20px;
-    line-height: 1.8em;
+	padding: 20px;
+	line-height: 1.8em;
 }
 
-h1
-{
+h1 {
 	font-weight: 300;
 	font-size: 24px;
 }
-h2
-{
+
+h2 {
 	padding-top: 20px;
 	font-weight: 600;
 }
-p
-{
+
+p {
 	font-size: 13px;
+}
+
+hr {
+	border: 0;
+	height: 0;
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }

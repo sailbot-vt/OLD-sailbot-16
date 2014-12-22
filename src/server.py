@@ -11,15 +11,15 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         return True
     
     def open(self):
-        print 'New connection established.'
+        print ('New connection established.')
         if self not in wss:
             wss.append(self)
       
     def on_message(self, message):
-        print 'Received message: %s' % message
+        print ('Received message: %s' % message)
  
     def on_close(self):
-        print 'Connection closed.'
+        print ('Connection closed.')
         if self in wss:
             wss.remove(self)
 
@@ -33,17 +33,18 @@ application = tornado.web.Application([
 
 def schudule_func():
     # called periodically
+    print ("Periodic function called!")
     wsSend("Ping!")
  
 if __name__ == "__main__":
-    print "Starting server."
+    print ("Starting server.")
     http_server = tornado.httpserver.HTTPServer(application)
-    http_server.listen(4041)
+    http_server.listen(4044)
     
     # creates a periodic callback function
     interval_ms = 1000
     main_loop = tornado.ioloop.IOLoop.instance()
-    sched = tornado.ioloop.PeriodicCallback(schudule_func(), interval_ms, io_loop = main_loop)
+    sched = tornado.ioloop.PeriodicCallback(schudule_func, interval_ms, io_loop = main_loop)
     
     # starts the callback and the main IO loop
     sched.start()

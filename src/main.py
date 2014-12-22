@@ -29,6 +29,8 @@ configureServos()
 server_thread = ServerThread()
 server_thread.start()
 
+server_thread.send_data("Ping!")
+
 while True:
     for angle in range(0, 180):
         # setServo(angle)

@@ -25,7 +25,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if self in wss:
             wss.remove(self)
 
-def wsSend(message):
+def write_data(message):
+    print ("Sending: %s" % message)
     for ws in wss:
         ws.write_message(message);
  
@@ -35,8 +36,7 @@ application = tornado.web.Application([
 
 def schudule_func():
     # called periodically
-    print ("Periodic function called!")
-    wsSend("Ping!")
+    pass
 
 class ServerThread(threading.Thread):
     
@@ -54,3 +54,5 @@ class ServerThread(threading.Thread):
         sched.start()
         main_loop.start()
         
+    def send_data(self, message):
+        write_data(message);

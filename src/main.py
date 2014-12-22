@@ -1,4 +1,5 @@
 import time
+from server import ServerThread
 
 def set(property, value):
     try:
@@ -24,11 +25,15 @@ DELAY_PERIOD = 0.01
 print("Beginning SailBOT autonomous navigation routines\n");
 configureServos()
 
+# start server thread
+server_thread = ServerThread()
+server_thread.start()
+
 while True:
     for angle in range(0, 180):
-        setServo(angle)
+        # setServo(angle)
         time.sleep(DELAY_PERIOD)
     for angle in range(0, 180):
-        setServo(180 - angle)
+        # setServo(180 - angle)
         time.sleep(DELAY_PERIOD)
 

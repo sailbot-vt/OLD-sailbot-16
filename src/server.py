@@ -2,6 +2,8 @@ import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
 import tornado.web
+import threading
+
 
 wss = []
 
@@ -35,17 +37,20 @@ def schudule_func():
     # called periodically
     print ("Periodic function called!")
     wsSend("Ping!")
- 
-if __name__ == "__main__":
-    print ("Starting server.")
-    http_server = tornado.httpserver.HTTPServer(application)
-    http_server.listen(4044)
+
+class ServerThread(threading.Thread):
     
-    # creates a periodic callback function
-    interval_ms = 1000
-    main_loop = tornado.ioloop.IOLoop.instance()
-    sched = tornado.ioloop.PeriodicCallback(schudule_func, interval_ms, io_loop = main_loop)
-    
-    # starts the callback and the main IO loop
-    sched.start()
-    main_loop.start()
+    def run(self):
+        print ("Starting server.")
+        http_server = tornado.httpserver.HTTPServer(application)
+        http_server.listen(4044)
+        
+        # creates a periodic callback function
+        interval_ms = 1000
+        main_loop = tornado.ioloop.IOLoop.instance()
+        sched = tornado.ioloop.PeriodicCallback(schudule_func, interval_ms, io_loop = main_loop)
+        
+        # starts the callback and the main IO loop
+        sched.start()
+        main_loop.start()
+        

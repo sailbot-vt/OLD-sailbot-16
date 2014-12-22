@@ -1,10 +1,9 @@
-from tornado import httpserver
-from tornado import websocket
-from tornado import ioloop
-from tornado import web
- 
- 
-class WSHandler(websocket.WebSocketHandler):
+import tornado.httpserver
+import tornado.websocket
+import tornado.ioloop
+import tornado.web
+
+class WSHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         print ("new connection");
         self.write_message("Hello World")
@@ -16,12 +15,11 @@ class WSHandler(websocket.WebSocketHandler):
       print ('connection closed')
  
  
-application = web.Application([
+application = tornado.web.Application([
     (r'/ws', WSHandler),
 ])
  
- 
 if __name__ == "__main__":
-    http_server = httpserver.HTTPServer(application)
+    http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(4041)
-    ioloop.IOLoop.instance().start()
+    tornado.ioloop.IOLoop.instance().start()

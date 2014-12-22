@@ -1,11 +1,11 @@
 window.onload = function() {
 
-	socket = new WebSocket('ws://127.0.01:4041/ws');
+	socket = new WebSocket('ws://127.0.0.1:4041/ws');
 
 	socket.onmessage = function(s) {
-		alert('Received: ' + s);
-		var request = JSON.parse(s);
-		var data = request[0];
+		alert('Received data!');
+		
+		//TODO: get server side working to implement this feature
 		
 		document.getElementById("timestamp").innerHTML = data.timestamp;
 		

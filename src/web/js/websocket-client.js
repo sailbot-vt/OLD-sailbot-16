@@ -1,6 +1,6 @@
 window.onload = function() {
 
-	socket = new WebSocket('ws://127.0.0.1:4041/ws');
+	socket = new WebSocket('ws://127.0.0.1:8888/ws');
 
 	socket.onmessage = function(s) {
 		alert('Received data!');

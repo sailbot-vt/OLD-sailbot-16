@@ -15,7 +15,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         print ('New connection established.')
         if self not in wss:
             wss.append(self)
-      
+            
     def on_message(self, message):
         print ('Received message: %s' % message)
  
@@ -36,20 +36,23 @@ class ServerThread(threading.Thread):
         for ws in wss:
             print ("Sending: %s" % message)
             ws.write_message(message);
-    
-    def schudule_func(self):
-        # called periodically
-        pass
+            
+    def close_sockets(self):
+        for ws in wss:
+            ws.close()
+            
+    def scheduled_func(self):
+        print("Scheduled function!")
     
     def run(self):
         print ("Starting server.")
         http_server = tornado.httpserver.HTTPServer(application)
-        http_server.listen(4041)
+        http_server.listen(8888)
         
         # creates a periodic callback function
-        interval_ms = 1000
+        interval_ms = 5000
         main_loop = tornado.ioloop.IOLoop.instance()
-        sched = tornado.ioloop.PeriodicCallback(self.schudule_func, interval_ms, io_loop = main_loop)
+        sched = tornado.ioloop.PeriodicCallback(self.scheduled_func, interval_ms, io_loop = main_loop)
         
         # starts the callback and the main IO loop
         sched.start()

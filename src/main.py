@@ -29,6 +29,10 @@ me = Data(timestamp = 0, lat = 0, long = 0, target_lat = 0, target_long = 0, hea
 
 print(me.to_JSON())
 
+me.update_attribute('lat', 4)
+
+print(me.to_JSON())
+
 """
 # start server thread
 server_thread = ServerThread()

@@ -7,7 +7,9 @@ import threading
 wss = []
 
 class WSHandler(tornado.websocket.WebSocketHandler):
-    
+    """ Creates the web socket server
+    """
+     
     def check_origin(self, origin):
         return True
     
@@ -28,9 +30,13 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 application = tornado.web.Application([
     (r'/ws', WSHandler),
 ])
+""" Defines the server parameters
+"""
 
 
 class ServerThread(threading.Thread):
+    """ Creates thread which runs the web socket server
+    """
     
     def send_data(self, message):
         for ws in wss:
@@ -38,6 +44,7 @@ class ServerThread(threading.Thread):
             ws.write_message(message);
             
     def close_sockets(self):
+        print("Closing all connections....")
         for ws in wss:
             ws.close()
             

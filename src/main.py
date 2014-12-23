@@ -25,13 +25,10 @@ DELAY_PERIOD = 0.01
 
 print("Beginning SailBOT autonomous navigation routines\n");
 
-me = Data(timestamp = 0, lat = 0, long = 0, target_lat = 0, target_long = 0, heading = 0, speed = 0, wind_dir = 0, roll = 0, pitch = 0, yaw = 0, state = 0)
+data = Data(timestamp=0, lat=0, long=0, target_lat=0, target_long=0, heading=0,
+          speed=0, wind_dir=0, roll=0, pitch=0, yaw=0, state=0)
 
-print(me.to_JSON())
-
-me.update_attribute('lat', 4)
-
-print(me.to_JSON())
+print(data.to_JSON())
 
 """
 # start server thread

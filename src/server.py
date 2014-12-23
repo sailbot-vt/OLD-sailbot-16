@@ -59,7 +59,7 @@ class ServerThread(threading.Thread):
         # creates a periodic callback function
         interval_ms = 5000
         main_loop = tornado.ioloop.IOLoop.instance()
-        sched = tornado.ioloop.PeriodicCallback(self.scheduled_func, interval_ms, io_loop = main_loop)
+        sched = tornado.ioloop.PeriodicCallback(self.scheduled_func, interval_ms, io_loop=main_loop)
         
         # starts the callback and the main IO loop
         sched.start()

@@ -4,7 +4,6 @@ import tornado.ioloop
 import tornado.web
 import threading
 
-
 wss = []
 
 class WSHandler(tornado.websocket.WebSocketHandler):
@@ -24,35 +23,34 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         print ('Connection closed.')
         if self in wss:
             wss.remove(self)
-
-def write_data(message):
-    print ("Sending: %s" % message)
-    for ws in wss:
-        ws.write_message(message);
  
+
 application = tornado.web.Application([
     (r'/ws', WSHandler),
 ])
 
-def schudule_func():
-    # called periodically
-    pass
 
 class ServerThread(threading.Thread):
+    
+    def send_data(self, message):
+        for ws in wss:
+            print ("Sending: %s" % message)
+            ws.write_message(message);
+    
+    def schudule_func(self):
+        # called periodically
+        pass
     
     def run(self):
         print ("Starting server.")
         http_server = tornado.httpserver.HTTPServer(application)
-        http_server.listen(4044)
+        http_server.listen(4041)
         
         # creates a periodic callback function
         interval_ms = 1000
         main_loop = tornado.ioloop.IOLoop.instance()
-        sched = tornado.ioloop.PeriodicCallback(schudule_func, interval_ms, io_loop = main_loop)
+        sched = tornado.ioloop.PeriodicCallback(self.schudule_func, interval_ms, io_loop = main_loop)
         
         # starts the callback and the main IO loop
         sched.start()
         main_loop.start()
-        
-    def send_data(self, message):
-        write_data(message);

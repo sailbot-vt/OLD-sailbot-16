@@ -30,16 +30,16 @@ data = Data(timestamp=0, lat=0, long=0, target_lat=0, target_long=0, heading=0,
 
 print(data.to_JSON())
 
-"""
+
 # start server thread
 server_thread = ServerThread()
 server_thread.start()
 
 while True:
-    print("Sending ping!")
+    # print("Sending ping!")
     server_thread.send_data("Ping!") 
-    time.sleep(DELAY_PERIOD * 10)
-""" 
+    time.sleep(DELAY_PERIOD * 100)
+
 
 """
 while True:

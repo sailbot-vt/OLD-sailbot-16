@@ -3,6 +3,7 @@ import tornado.websocket
 import tornado.ioloop
 import tornado.web
 import threading
+import os
 
 wss = []
 
@@ -26,10 +27,26 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if self in wss:
             wss.remove(self)
  
+class IndexHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self):
+        self.render('web/index.html')
 
-application = tornado.web.Application([
-    (r'/ws', WSHandler),
-])
+
+class Application(tornado.web.Application):
+    def __init__(self):
+        handlers = [
+            (r'/ws', WSHandler),
+            (r'/', IndexHandler),
+        ]
+        settings = {
+            "debug": True,
+            "static_path": os.path.join(os.path.dirname(__file__), "web")
+        }
+        tornado.web.Application.__init__(self, handlers, **settings)
+
+
+application = Application()
 """ Defines the server parameters
 """
 

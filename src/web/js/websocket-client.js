@@ -3,9 +3,8 @@ window.onload = function() {
 	socket = new WebSocket('ws://127.0.0.1:8888/ws');
 
 	socket.onmessage = function(s) {
-		alert('Received data!');
 		
-		//TODO: get server side working to implement this feature
+		data = JSON.parse(s.data);
 		
 		document.getElementById("timestamp").innerHTML = data.timestamp;
 		

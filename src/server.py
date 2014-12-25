@@ -58,7 +58,11 @@ class ServerThread(threading.Thread):
     def send_data(self, message):
         for ws in wss:
             print ("Sending: %s" % message)
-            ws.write_message(message);
+            try:
+                ws.write_message(message);
+                break
+            except TypeError:
+                print ("[E]: Tried to send invalid value.")
             
     def close_sockets(self):
         print("Closing all connections....")

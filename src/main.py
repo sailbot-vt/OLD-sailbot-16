@@ -1,6 +1,7 @@
 import time
 from server import ServerThread
 from data import Data
+import threading
 
 def set(property, value):
     try:
@@ -21,33 +22,29 @@ def configureServos():
 
 ## ----------------------------------------------------------
 
-DELAY_PERIOD = 0.01
-
 print("Beginning SailBOT autonomous navigation routines\n");
 
+# Variables and constants
 data = Data(timestamp=0, lat=0, long=0, target_lat=0, target_long=0, heading=0,
           speed=0, wind_dir=0, roll=0, pitch=0, yaw=0, state=0)
 
-print(data.to_JSON())
+DELAY_PERIOD = 0.01
+
+# Setup methods
+configureServos()
 
 
-# start server thread
-server_thread = ServerThread()
-server_thread.start()
+## ----------------------------------------------------------
 
-while True:
-    # print("Sending ping!")
-    server_thread.send_data("Ping!") 
-    time.sleep(DELAY_PERIOD * 100)
+class Thread01(threading.Thread):
 
+    def run(self):
+        while True:
+            
+            for angle in range(0, 180):
+                # setServo(angle)
+                time.sleep(DELAY_PERIOD)
+            for angle in range(0, 180):
+                # setServo(180 - angle)
+                time.sleep(DELAY_PERIOD)
 
-"""
-while True:
-    configureServos()
-    for angle in range(0, 180):
-        # setServo(angle)
-        time.sleep(DELAY_PERIOD)
-    for angle in range(0, 180):
-        # setServo(180 - angle)
-        time.sleep(DELAY_PERIOD)
-"""

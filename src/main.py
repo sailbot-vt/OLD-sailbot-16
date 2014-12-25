@@ -20,19 +20,6 @@ def configureServos():
     set("servo_max", "180")
     set("active", "1")
 
-## ----------------------------------------------------------
-
-print("Beginning SailBOT autonomous navigation routines\n");
-
-# Variables and constants
-data = Data(timestamp=0, lat=0, long=0, target_lat=0, target_long=0, heading=0,
-          speed=0, wind_dir=0, roll=0, pitch=0, yaw=0, state=0)
-
-DELAY_PERIOD = 0.01
-
-# Setup methods
-configureServos()
-
 
 ## ----------------------------------------------------------
 
@@ -47,4 +34,36 @@ class Thread01(threading.Thread):
             for angle in range(0, 180):
                 # setServo(180 - angle)
                 time.sleep(DELAY_PERIOD)
+ 
+## ----------------------------------------------------------
+                
+class DataThread(threading.Thread):
+
+    def run(self):
+        print("Starting the data thread!")
+        DELAY_PERIOD = 2
+        server_thread = ServerThread()
+        server_thread.start()
+        
+        while True:
+            server_thread.send_data(data.to_JSON())
+            print("Data sent to the server")
+            time.sleep(DELAY_PERIOD)
+            
+            
+## ----------------------------------------------------------
+
+print("Beginning SailBOT autonomous navigation routines\n");
+
+# Variables and constants
+data = Data(timestamp=0, lat=0, long=0, target_lat=0, target_long=0, heading=0,
+          speed=0, wind_dir=0, roll=0, pitch=0, yaw=0, state=0)
+
+DELAY_PERIOD = 0.01
+
+# Setup methods
+configureServos()
+
+data_thread = DataThread()
+data_thread.start()
 

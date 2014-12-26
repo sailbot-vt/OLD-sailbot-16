@@ -38,10 +38,12 @@ class Thread01(threading.Thread):
 ## ----------------------------------------------------------
                 
 class DataThread(threading.Thread):
-
+    """ Transmits the data object to the server thread
+    """
+    
     def run(self):
         print("Starting the data thread!")
-        DELAY_PERIOD = 2
+        DELAY_PERIOD = 5 # time between transmission in seconds
         server_thread = ServerThread()
         server_thread.start()
         

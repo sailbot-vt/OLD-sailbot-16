@@ -1,3 +1,5 @@
+var marker;
+
 function initialize() {
 	var mapOptions = {
 		center : {
@@ -78,3 +80,9 @@ function initialize() {
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
+
+function update_boat_marker(lat, long)
+{
+	var location = new google.maps.LatLng(lat, long)
+	marker.setPosition(location);
+}

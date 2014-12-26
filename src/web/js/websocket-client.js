@@ -23,7 +23,7 @@ window.onload = function() {
 		
 		document.getElementById("state").innerHTML = data.state;
 		
-		//TODO: call global method to update latitude and longitude on the map 
+		update_boat_marker(data.lat, data.long);
 
 	};
 

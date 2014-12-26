@@ -59,7 +59,7 @@ class ServerThread(threading.Thread):
         for ws in wss:
             print ("Sending: %s" % message)
             try:
-                ws.write_message(message);
+                ws.write_message(message)
                 break
             except TypeError:
                 print ("[E]: Tried to send invalid value.")
@@ -68,20 +68,13 @@ class ServerThread(threading.Thread):
         print("Closing all connections....")
         for ws in wss:
             ws.close()
-            
-    def scheduled_func(self):
-        print("Scheduled function!")
     
     def run(self):
         print ("Starting server.")
         http_server = tornado.httpserver.HTTPServer(application)
         http_server.listen(8888)
         
-        # creates a periodic callback function
-        interval_ms = 5000
         main_loop = tornado.ioloop.IOLoop.instance()
-        sched = tornado.ioloop.PeriodicCallback(self.scheduled_func, interval_ms, io_loop=main_loop)
         
-        # starts the callback and the main IO loop
-        sched.start()
+        # starts the main IO loop
         main_loop.start()

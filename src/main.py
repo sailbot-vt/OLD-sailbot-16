@@ -2,7 +2,36 @@ import time
 from server import ServerThread
 from data import Data
 import threading
- 
+import json
+from location import Location
+
+
+# Variables and constants
+data = Data(timestamp=0, lat=0, long=0, target_lat=0, target_long=0, heading=0,
+          speed=0, wind_dir=0, roll=0, pitch=0, yaw=0, state=0)
+servos = Data(rutter=0, sail=0)
+locations = []
+
+
+def object_decoder(obj):
+    return Location(obj['latitude'], obj['longitude'])
+
+def get_locations():
+    try:
+        with open ("locations.json", "r") as myfile:
+                json_data=myfile.read().replace('\n', '')              
+        locations = json.loads(json_data, object_hook=object_decoder)
+        
+        print("Loaded the following locations:")
+        for location in locations:
+            print(location.__str__())
+        print("\n")
+        
+    except FileNotFoundError:
+        print("[E]: The locations JSON file could not be found!")
+    except ValueError:
+        print("[E]: The locations JSON file is malformed!")
+
 ## ----------------------------------------------------------
                 
 class DataThread(threading.Thread):
@@ -40,13 +69,13 @@ class MotorThread(threading.Thread):
             print("Error writing to: " + property + " value: " + value)
     
     def setServo(self, angle):
-        set("servo", str(angle))
+        self.set("servo", str(angle))
         
     def configureServos(self):
-        set("delayed", "0")
-        set("mode", "servo")
-        set("servo_max", "180")
-        set("active", "1")
+        self.set("delayed", "0")
+        self.set("mode", "servo")
+        self.set("servo_max", "180")
+        self.set("active", "1")
         
     def run(self):
         self.configureServos()
@@ -56,11 +85,7 @@ class MotorThread(threading.Thread):
 
 print("Beginning SailBOT autonomous navigation routines\n");
 
-# Variables and constants
-data = Data(timestamp=0, lat=0, long=0, target_lat=0, target_long=0, heading=0,
-          speed=0, wind_dir=0, roll=0, pitch=0, yaw=0, state=0)
-
-DELAY_PERIOD = 0.01
+get_locations()
 
 data_thread = DataThread()
 motor_thread = MotorThread()
@@ -69,4 +94,5 @@ logic_thread = LogicThread()
 data_thread.start()
 motor_thread.start()
 logic_thread.start()
+
 

@@ -9,7 +9,7 @@ class Location(object):
         self.longitude = longitude_
 
     def __str__(self):
-        return "(%s, %s)"%(self.latitude, self.longitude) 
+        return "(%s, %s)" % (self.latitude, self.longitude) 
 
     def get_latitude(self):
         return self.latitude

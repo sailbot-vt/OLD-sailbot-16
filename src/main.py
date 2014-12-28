@@ -1,9 +1,9 @@
 import time
-from server import ServerThread
-from data import Data
+from modules.server import ServerThread
+from modules.data import Data
 import threading
 import json
-from location import Location
+from modules.location import Location
 
 
 # Variables and constants
@@ -13,14 +13,14 @@ servos = Data(rutter=0, sail=0)
 locations = []
 
 
-def object_decoder(obj):
+def location_decoder(obj):
     return Location(obj['latitude'], obj['longitude'])
 
 def get_locations():
     try:
         with open ("locations.json", "r") as myfile:
-                json_data=myfile.read().replace('\n', '')              
-        locations = json.loads(json_data, object_hook=object_decoder)
+                json_data = myfile.read().replace('\n', '')              
+        locations = json.loads(json_data, object_hook=location_decoder)
         
         print("Loaded the following locations:")
         for location in locations:
@@ -40,7 +40,7 @@ class DataThread(threading.Thread):
     
     def run(self):
         print("Starting the data thread!")
-        DELAY_PERIOD = 5 # time between transmission in seconds
+        DELAY_PERIOD = 5  # time between transmission in seconds
         server_thread = ServerThread()
         server_thread.start()
         

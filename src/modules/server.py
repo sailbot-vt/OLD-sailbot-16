@@ -6,6 +6,7 @@ import threading
 import os
 
 wss = []
+PORT = 8888
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     """ Creates the web socket server
@@ -71,10 +72,17 @@ class ServerThread(threading.Thread):
     
     def run(self):
         print ("Starting server.")
-        http_server = tornado.httpserver.HTTPServer(application)
-        http_server.listen(8888)
         
-        main_loop = tornado.ioloop.IOLoop.instance()
-        
-        # starts the main IO loop
-        main_loop.start()
+        try:
+            http_server = tornado.httpserver.HTTPServer(application)
+            http_server.listen(PORT)
+            
+            main_loop = tornado.ioloop.IOLoop.instance()
+            
+            print("The web server successfully bound to port %d" % PORT)
+            
+            # starts the main IO loop
+            main_loop.start()
+            
+        except OSError:
+            print("[E]: The web server failed to bind to the port!")

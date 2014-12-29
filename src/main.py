@@ -4,6 +4,9 @@ from modules.data import Data
 import threading
 import json
 from modules.location import Location
+import configparser
+import logging
+from datetime import datetime
 
 
 # Variables and constants
@@ -11,6 +14,9 @@ data = Data(timestamp=0, lat=0, long=0, target_lat=0, target_long=0, heading=0,
           speed=0, wind_dir=0, roll=0, pitch=0, yaw=0, state=0)
 servos = Data(rutter=0, sail=0)
 locations = []
+
+DEBUG = False
+PORT = 8888
 
 
 def location_decoder(obj):
@@ -25,12 +31,32 @@ def get_locations():
         print("Loaded the following locations:")
         for location in locations:
             print(location.__str__())
-        print("\n")
         
     except FileNotFoundError:
         print("[E]: The locations JSON file could not be found!")
     except ValueError:
         print("[E]: The locations JSON file is malformed!")
+        
+def get_config():
+    global DEBUG
+    global PORT
+
+    try:
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        DEBUG = config.getboolean("DEFAULT", "debug")
+        PORT = config.getint("DEFAULT", "port")
+        
+        print("Configuration file successfully loaded.")
+        
+    except configparser.NoOptionError:
+        print("[E]: The locations configuration file could not be found or is malformed!")
+        
+def setup_config():
+    if(DEBUG):
+        logging.basicConfig(filename='sailbot.log',level=logging.DEBUG)
+        logging.info("-------------------------------")
+        logging.info("Log started on: %s" % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
 ## ----------------------------------------------------------
                 
@@ -41,7 +67,7 @@ class DataThread(threading.Thread):
     def run(self):
         print("Starting the data thread!")
         DELAY_PERIOD = 5  # time between transmission in seconds
-        server_thread = ServerThread()
+        server_thread = ServerThread(kwargs={'PORT': PORT})
         server_thread.start()
         
         while True:
@@ -83,9 +109,11 @@ class MotorThread(threading.Thread):
             
 ## ----------------------------------------------------------
 
-print("Beginning SailBOT autonomous navigation routines\n");
-
+get_config()
+setup_config()
 get_locations()
+
+print("Beginning SailBOT autonomous navigation routines");
 
 data_thread = DataThread()
 motor_thread = MotorThread()

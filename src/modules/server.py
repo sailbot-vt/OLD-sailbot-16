@@ -4,9 +4,9 @@ import tornado.ioloop
 import tornado.web
 import threading
 import os
+import logging
 
 wss = []
-PORT = 8888
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     """ Creates the web socket server
@@ -75,11 +75,12 @@ class ServerThread(threading.Thread):
         
         try:
             http_server = tornado.httpserver.HTTPServer(application)
-            http_server.listen(PORT)
+            http_server.listen(self._kwargs['PORT'])
             
             main_loop = tornado.ioloop.IOLoop.instance()
             
-            print("The web server successfully bound to port %d" % PORT)
+            logging.info("The web server successfully bound to port %d" % self._kwargs['PORT'])
+            print("The web server successfully bound to port %d" % self._kwargs['PORT'])
             
             # starts the main IO loop
             main_loop.start()

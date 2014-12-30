@@ -9,6 +9,7 @@ from modules.location import Location
 import configparser
 import logging
 from datetime import datetime
+import tornado.websocket
 
 # Variables and constants
 
@@ -117,7 +118,10 @@ class DataThread(threading.Thread):
     server_thread = None;
     
     def send_data(self, data):
-        server_thread.send_data(data)
+        try:
+            server_thread.send_data(data)
+        except tornado.websocket.WebSocketClosedError:
+            logging.error("Could not send data because the socket is closed.")
 
     def run(self):
         global server_thread

@@ -75,7 +75,22 @@ def get_config():
 
         print('The locations configuration file could not be found or is malformed!')
 
-
+class WebSocketLogger(logging.StreamHandler):
+    """
+    A handler class which allows the cursor to stay on
+    one line for selected messages
+    """
+    def emit(self, record):
+        try:
+            packet = Data(message=self.format(record), type=record.levelno)
+            data_thread.send_data(packet.to_JSON())
+            self.flush()
+        except NameError:
+            print("The server thread has not been created yet. Dropping log output.")
+        except:
+            self.handleError(record)
+            
+            
 def setup_config():
     if DEBUG:
         LOG_FORMAT = "[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s"
@@ -86,6 +101,7 @@ def setup_config():
         root.setFormatter(logging.Formatter(LOG_FORMAT, "%H:%M:%S"))
         
         logging.getLogger().addHandler(root)
+        logging.getLogger().addHandler(WebSocketLogger())
         
         logging.info('-------------------------------')
         logging.info('Log started on: %s'
@@ -98,8 +114,14 @@ class DataThread(threading.Thread):
 
     """ Transmits the data object to the server thread
     """
+    server_thread = None;
+    
+    def send_data(self, data):
+        server_thread.send_data(data)
 
     def run(self):
+        global server_thread
+        
         logging.info('Starting the data thread!')
         DELAY_PERIOD = 5  # time between transmission in seconds
         server_thread = ServerThread(name="Server", kwargs={'PORT': PORT})

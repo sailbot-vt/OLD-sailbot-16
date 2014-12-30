@@ -60,7 +60,7 @@ class ServerThread(threading.Thread):
 
     def send_data(self, message):
         for ws in wss:
-            logging.info('Sending: %s' % message)
+            # do not log any data here, doing so would create an infinite loop
             try:
                 ws.write_message(message)
                 break

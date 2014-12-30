@@ -13,50 +13,81 @@
         </script>
 
 </head>
-<body>
+<body onresize="set_console_height()" onload="set_console_height()">
+    <script>
+    function set_console_height() {
+        var h = document.getElementById("panel");
+        var j = document.getElementById("console");
+        
+        document.getElementById("console").style.height = (document.body.scrollHeight - (h.clientHeight + 40)) + 'px';
+        // there's 20px of padding around the panel div unaccounted for in addition to the 20px padding offset
+    }
+    
+    </script>
 	<div id="sidebar">
-		<h1>VT SailBOT Navigation Pane</h1>
-		<p>
-			Last updated: <span id="timestamp"></span>
-		</p>
-		<h2>Navigation</h2>
-		<p>
-			Boat Latitude: <span id="lat"></span>
-		</p>
-		<p>
-			Boat Longitude: <span id="long"></span>
-		</p>
-		<hr />
-		<p>
-			Target Latitude: <span id="target_lat"></span>
-		</p>
-		<p>
-			Target Longitude: <span id="target_long"></span>
-		</p>
-		<hr />
-		<p>
-			Heading: <span id="heading"></span>
-		</p>
-		<p>
-			Speed: <span id="speed"></span>
-		</p>
-		<p>
-			Wind Direction: <span id="wind_dir"></span>
-		</p>
-		<p>
-			Roll: <span id="roll"></span>
-		</p>
-		<p>
-			Pitch: <span id="pitch"></span>
-		</p>
-		<p>
-			Yaw: <span id="yaw"></span>
-		</p>
+		<section id="panel">
+			<h1>VT SailBOT Navigation Pane</h1>
+			<p>
+				Last updated: <span id="timestamp"></span>
+			</p>
+			<h2>Navigation</h2>
+			<p>
+				Boat Latitude: <span id="lat"></span>
+			</p>
+			<p>
+				Boat Longitude: <span id="long"></span>
+			</p>
+			<hr />
+			<p>
+				Target Latitude: <span id="target_lat"></span>
+			</p>
+			<p>
+				Target Longitude: <span id="target_long"></span>
+			</p>
+			<hr />
+			<p>
+				Heading: <span id="heading"></span>
+			</p>
+			<p>
+				Speed: <span id="speed"></span>
+			</p>
+			<p>
+				Wind Direction: <span id="wind_dir"></span>
+			</p>
+			<p>
+				Roll: <span id="roll"></span>
+			</p>
+			<p>
+				Pitch: <span id="pitch"></span>
+			</p>
+			<p>
+				Yaw: <span id="yaw"></span>
+			</p>
+		</section>
 
-		<h2>Logic</h2>
-		<p>
-			State: <span id="state"></span>
-		</p>
+		<section id="console">
+			<div>
+				<span class="none">NONE</span>Message!
+			</div>
+
+			<div>
+				<span class="info">Info</span>Message!
+			</div>
+			<div>
+				<span class="debug">DEBUG</span>Message!
+			</div>
+			<div>
+				<span class="warning">WARNING</span>Message!
+			</div>
+			<div>
+				<span class="error">Error</span>Message!
+			</div>
+
+			<div>
+				<span class="critical">Critical</span>Message!
+			</div>
+
+		</section>
 	</div>
 	<div id="map-canvas"></div>
 </body>

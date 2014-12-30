@@ -31,6 +31,7 @@ locations = []
 
 DEBUG = False
 PORT = 8888
+LOG_NAME = 'sailbot.log'
 
 
 def location_decoder(obj):
@@ -43,35 +44,49 @@ def get_locations():
             json_data = myfile.read().replace('\n', '')
         locations = json.loads(json_data, object_hook=location_decoder)
 
-        print('Loaded the following locations:')
+        logging.info('Loaded the following locations:')
         for location in locations:
-            print(location.__str__())
+            logging.info(location.__str__())
     except FileNotFoundError:
 
-        print('[E]: The locations JSON file could not be found!')
+        logging.error('The locations JSON file could not be found!')
     except ValueError:
-        print('[E]: The locations JSON file is malformed!')
+        logging.error('The locations JSON file is malformed!')
 
 
 def get_config():
     global DEBUG
     global PORT
+    global LOG_NAME
 
+    # logging in this method must stay as print statements because the logger
+    # has not been defined yet
+    
     try:
         config = configparser.ConfigParser()
         config.read('config.ini')
+        
         DEBUG = config.getboolean('DEFAULT', 'debug')
         PORT = config.getint('DEFAULT', 'port')
+        LOG_NAME = config.get('DEFAULT', 'log_name')
 
         print('Configuration file successfully loaded.')
     except configparser.NoOptionError:
 
-        print('[E]: The locations configuration file could not be found or is malformed!')
+        print('The locations configuration file could not be found or is malformed!')
 
 
 def setup_config():
     if DEBUG:
-        logging.basicConfig(filename='sailbot.log', level=logging.DEBUG)
+        LOG_FORMAT = "[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s"
+        
+        logging.basicConfig(filename=LOG_NAME, format=LOG_FORMAT, datefmt='%H:%M:%S', level=logging.DEBUG)
+ 
+        root = logging.StreamHandler()
+        root.setFormatter(logging.Formatter(LOG_FORMAT, "%H:%M:%S"))
+        
+        logging.getLogger().addHandler(root)
+        
         logging.info('-------------------------------')
         logging.info('Log started on: %s'
                      % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -85,14 +100,14 @@ class DataThread(threading.Thread):
     """
 
     def run(self):
-        print('Starting the data thread!')
+        logging.info('Starting the data thread!')
         DELAY_PERIOD = 5  # time between transmission in seconds
-        server_thread = ServerThread(kwargs={'PORT': PORT})
+        server_thread = ServerThread(name="Server", kwargs={'PORT': PORT})
         server_thread.start()
 
         while True:
             server_thread.send_data(data.to_JSON())
-            print('Data sent to the server')
+            logging.info('Data sent to the server %s' % json.dumps(json.loads(data.to_JSON())))
             time.sleep(DELAY_PERIOD)
 
 
@@ -114,7 +129,7 @@ class MotorThread(threading.Thread):
             f.write(value)
             f.close()
         except:
-            print('Error writing to: ' + property + ' value: ' + value)
+            logging.error('Error writing to: ' + property + ' value: ' + value)
 
     def setServo(self, angle):
         self.set('servo', str(angle))
@@ -130,16 +145,17 @@ class MotorThread(threading.Thread):
 
 
 ## ----------------------------------------------------------
+threading.current_thread().setName('Main')
 
 get_config()
 setup_config()
 get_locations()
 
-print('Beginning SailBOT autonomous navigation routines')
+logging.info('Beginning SailBOT autonomous navigation routines....')
 
-data_thread = DataThread()
-motor_thread = MotorThread()
-logic_thread = LogicThread()
+data_thread = DataThread(name="Data")
+motor_thread = MotorThread(name="Motor")
+logic_thread = LogicThread(name="Logic")
 
 data_thread.start()
 motor_thread.start()

@@ -20,15 +20,15 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         return True
 
     def open(self):
-        print('New connection established.')
+        logging.info('New connection established.')
         if self not in wss:
             wss.append(self)
 
     def on_message(self, message):
-        print('Received message: %s' % message)
+        logging.info('Received message: %s' % message)
 
     def on_close(self):
-        print('Connection closed.')
+        logging.info('Connection closed.')
         if self in wss:
             wss.remove(self)
 
@@ -60,20 +60,20 @@ class ServerThread(threading.Thread):
 
     def send_data(self, message):
         for ws in wss:
-            print('Sending: %s' % message)
+            logging.info('Sending: %s' % message)
             try:
                 ws.write_message(message)
                 break
             except TypeError:
-                print('[E]: Tried to send invalid value.')
+                logging.error('Tried to send invalid value.')
 
     def close_sockets(self):
-        print('Closing all connections....')
+        logging.info('Closing all connections....')
         for ws in wss:
             ws.close()
 
     def run(self):
-        print('Starting server.')
+        logging.info('Starting server.')
 
         try:
             http_server = tornado.httpserver.HTTPServer(application)
@@ -83,12 +83,10 @@ class ServerThread(threading.Thread):
 
             logging.info('The web server successfully bound to port %d'
                          % self._kwargs['PORT'])
-            print('The web server successfully bound to port %d' \
-                % self._kwargs['PORT'])
 
             # starts the main IO loop
 
             main_loop.start()
         except OSError:
 
-            print('[E]: The web server failed to bind to the port!')
+            logging.error('The web server failed to bind to the port!')

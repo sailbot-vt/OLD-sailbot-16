@@ -37,7 +37,7 @@ class IndexHandler(tornado.web.RequestHandler):
 
     @tornado.web.asynchronous
     def get(self):
-        self.render('web/index.html')
+        self.render('../web/index.html')
 
 
 class Application(tornado.web.Application):
@@ -46,7 +46,7 @@ class Application(tornado.web.Application):
         handlers = [(r'/ws', WSHandler), (r'/', IndexHandler)]
         settings = {'debug': True,
                     'static_path': os.path.join(os.path.dirname(__file__),
-                    'web')}
+                    '../web')}
         tornado.web.Application.__init__(self, handlers, **settings)
 
 

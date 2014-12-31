@@ -14,16 +14,6 @@
 
 </head>
 <body onresize="set_console_height()" onload="set_console_height()">
-    <script>
-    function set_console_height() {
-        var h = document.getElementById("panel");
-        var j = document.getElementById("console");
-        
-        document.getElementById("console").style.height = (document.body.scrollHeight - (h.clientHeight + 40)) + 'px';
-        // there's 20px of padding around the panel div unaccounted for in addition to the 20px padding offset
-    }
-    
-    </script>
 	<div id="sidebar">
 		<section id="panel">
 			<h1>VT SailBOT Navigation Pane</h1>

@@ -34,6 +34,7 @@ html, body, #map-canvas, #sidebar {
 	overflow-y: scroll;
 	height: 50px;
 	font-size: 13px;
+	margin-top:20px;
 }
 
 #console span {

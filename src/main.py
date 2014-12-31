@@ -45,9 +45,11 @@ def get_locations():
             json_data = myfile.read().replace('\n', '')
         locations = json.loads(json_data, object_hook=location_decoder)
 
-        logging.info('Loaded the following locations:')
+        l = []
         for location in locations:
-            logging.info(location.__str__())
+            l.append(location.__str__())
+        
+        logging.info("Loaded the following locations: %s" % l)
     except FileNotFoundError:
 
         logging.error('The locations JSON file could not be found!')

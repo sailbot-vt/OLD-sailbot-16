@@ -118,10 +118,11 @@ class DataThread(threading.Thread):
     server_thread = None;
     
     def send_data(self, data):
+        # do not log any data here, doing so would create an infinite loop
         try:
             server_thread.send_data(data)
         except tornado.websocket.WebSocketClosedError:
-            logging.error("Could not send data because the socket is closed.")
+            print("Could not send data because the socket is closed.")
 
     def run(self):
         global server_thread

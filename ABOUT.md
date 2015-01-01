@@ -3,12 +3,15 @@
 ##Introduction
 
 **What is SailBOT**
+
 SailBOT is a competition to build and program an autonomous sailing robot capable of navigating obstacles in a dynamic, real-world sailing environment. The robot uses on-board sensor input to effectively sail towards marked latitude and longitude coordinate locations and avoid obstacles.
 
 **Project Coding Goals**
+
 The goal of the project is to build upon the SailBOT foundation laid in previous years. It should be extensible, modular, verbose, and minimalistic.
 
 ##How to contribute
+
 All members of the SailBOT coding team have full read and write access to the group's internal repositories.
 
 We use [GitHub](https://github.com/), a collaborative coding tool, to version the code.
@@ -16,12 +19,15 @@ We use [GitHub](https://github.com/), a collaborative coding tool, to version th
 Now, if you know what you're doing, you can skip most of the steps below. Just clone the repository and get to work. Otherwise, you can keep reading to get set up.
 
 **Download the GitHub GUI**
+
 Download and install the GUI client appropriate for your system: [Windows](https://windows.github.com/) or [Mac](https://mac.github.com/).
 
 **Request access to the repository**
+
 Make sure you have created a GitHub account. Email one of the SailBOT leads with your GitHub username and we will add you.
 
 **Clone**
+
 Code is stored in the GitHub repository. It is synced with the code stored locally on your computer. When you make a change you create a *commit*. This commit is *pushed* to the GitHub server and the repository updates. Other collaborators will *pull* your commit down and their local versions will also updates.
 
 The GUI version of the program makes this process super simple. Once you are added to the repository, click <kbd>+</kbd> to add a new repository then click the <kbd>clone</kbd> tab. Select the SailBOT repository. Clone the repository wherever you would like.

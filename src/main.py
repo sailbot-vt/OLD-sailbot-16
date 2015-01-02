@@ -10,6 +10,7 @@ import configparser
 import logging
 from datetime import datetime
 import tornado.websocket
+import modules.calc
 
 # Variables and constants
 

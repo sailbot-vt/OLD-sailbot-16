@@ -175,19 +175,25 @@ class MotorThread(threading.Thread):
 
 
 ## ----------------------------------------------------------
-threading.current_thread().setName('Main')
-
-get_config()
-setup_config()
-get_locations()
-
-logging.info('Beginning SailBOT autonomous navigation routines....')
-
-data_thread = DataThread(name="Data")
-motor_thread = MotorThread(name="Motor")
-logic_thread = LogicThread(name="Logic")
-
-data_thread.start()
-motor_thread.start()
-logic_thread.start()
+if __name__=="__main__":
+    try:
+        threading.current_thread().setName('Main')
+        
+        get_config()
+        setup_config()
+        get_locations()
+        
+        logging.info('Beginning SailBOT autonomous navigation routines....')
+        
+        data_thread = DataThread(name="Data")
+        motor_thread = MotorThread(name="Motor")
+        logic_thread = LogicThread(name="Logic")
+        
+        data_thread.start()
+        motor_thread.start()
+        logic_thread.start()
+        
+    except KeyboardInterrupt:
+        logging.critical("Program terminating!")
+    
 

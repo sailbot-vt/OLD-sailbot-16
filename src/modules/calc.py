@@ -31,6 +31,18 @@ def direction_to_point(current, target):
 
     return angle
 
+def point_proximity(current, target):
+    dist_lat = 111132.954 - 559.822 * math.cos(2 * current.latitude) \
+        + 1.1175 * math.cos(4 * current.latitude)
+    dist_lon = math.pi / 180 * 6367449 * math.cos(current.latitude)
+
+    lat_meter = math.fabs(math.fabs(target.latitude) - math.fabs(current.latitude)) * dist_lat
+    lon_meter = math.fabs(math.fabs(target.longitude) - math.fabs(current.longitude)) * dist_lon
+    
+    distance = math.sqrt(math.pow(lat_meter, 2) + math.pow(lon_meter, 2))
+    
+    return (distance <= 10) # point_proximity_radius can be changed
+
 
 
             

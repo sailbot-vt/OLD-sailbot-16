@@ -8,28 +8,14 @@ import math
 """
 
 def direction_to_point(current, target):
-    dist_lat = 111132.954 - 559.822 * math.cos(2 * current.latitude) \
-        + 1.1175 * math.cos(4 * current.latitude)
-    dist_lon = math.pi / 180 * 6367449 * math.cos(current.latitude)
-
-    lat_meter = math.fabs(math.fabs(target.latitude) - math.fabs(current.latitude)) * dist_lat
-    lon_meter = math.fabs(math.fabs(target.longitude) - math.fabs(current.longitude)) * dist_lon
-
-    difference = lat_meter / lon_meter
-    degree = math.fabs(math.atan(difference) * 180 / math.pi)
-
-    angle = 0
-
-    if (target.latitude >= current.latitude) & (target.longitude >= current.longitude):
-        angle = 90 - degree
-    elif (target.latitude <= current.latitude) & (target.longitude >= current.longitude):                                                              
-        angle = 90 + degree
-    elif (target.latitude <= current.latitude) & (target.longitude <= current.longitude):
-        angle = 270 - degree
-    elif (target.latitude >= current.latitude) & (target.longitude <= current.longitude):
-        angle = 270 + degree
-
-    return angle
+    a = math.radians(current.latitude)
+    b = math.radians(target.latitude)
+    d = math.radians(target.longitude - current.longitude)
+    
+    y = math.sin(d) * math.cos(b)
+    x = math.cos(a) * math.sin(b) - math.sin(a) * math.cos(b) * math.cos(d)
+    
+    return (math.degrees(math.atan2(y, x)) + 360) % 360
 
 def point_proximity(current, target):
     a = math.sin(math.radians(current.latitude))

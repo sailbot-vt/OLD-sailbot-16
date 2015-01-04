@@ -73,6 +73,7 @@ def get_config():
         DEBUG = config.getboolean('DEFAULT', 'debug')
         PORT = config.getint('DEFAULT', 'port')
         LOG_NAME = config.get('DEFAULT', 'log_name')
+        modules.calc.point_proximity_radius = config.get('LOGIC', 'point_proximity_radius')
 
         print('Configuration file successfully loaded.')
     except configparser.NoOptionError:

@@ -7,6 +7,8 @@ import math
     to return a result.
 """
 
+point_proximity_radius = 5
+
 def direction_to_point(current, target):
     a = math.radians(current.latitude)
     b = math.radians(target.latitude)
@@ -27,7 +29,7 @@ def point_proximity(current, target):
     f = math.acos(e)
     distance = f * 6371 * 1000
     
-    return (distance <= 5) # point_proximity_radius can be changed
+    return (distance <= point_proximity_radius)
 
 
             

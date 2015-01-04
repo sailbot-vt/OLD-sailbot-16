@@ -34,6 +34,8 @@ locations = []
 DEBUG = False
 PORT = 8888
 LOG_NAME = 'sailbot.log'
+TRANSMISSION_DELAY_PERIOD = 5
+EVAL_DELAY_PERIOD = 30
 
 
 def location_decoder(obj):
@@ -73,6 +75,9 @@ def get_config():
         DEBUG = config.getboolean('DEFAULT', 'debug')
         PORT = config.getint('DEFAULT', 'port')
         LOG_NAME = config.get('DEFAULT', 'log_name')
+        TRANSMISSION_DELAY_PERIOD = config.get('DEFAULT', 'transmission_delay')
+        EVAL_DELAY_PERIOD = config.get('DEFAULT', 'eval_delay')
+        
         modules.calc.point_proximity_radius = config.get('LOGIC', 'point_proximity_radius')
 
         print('Configuration file successfully loaded.')
@@ -132,14 +137,13 @@ class DataThread(threading.Thread):
         global server_thread
         
         logging.info('Starting the data thread!')
-        DELAY_PERIOD = 5  # time between transmission in seconds
         server_thread = ServerThread(name="Server", kwargs={'PORT': PORT})
         server_thread.start()
 
         while True:
             server_thread.send_data(data.to_JSON())
             logging.info('Data sent to the server %s' % json.dumps(json.loads(data.to_JSON())))
-            time.sleep(DELAY_PERIOD)
+            time.sleep(TRANSMISSION_DELAY_PERIOD)
 
 
 ## ----------------------------------------------------------

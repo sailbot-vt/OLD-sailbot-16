@@ -15,6 +15,7 @@ import modules.calc
 # Variables and constants
 
 data = Data(
+    category="data",
     timestamp=0,
     lat=0,
     long=0,
@@ -92,7 +93,7 @@ class WebSocketLogger(logging.StreamHandler):
     """
     def emit(self, record):
         try:
-            packet = Data(message=self.format(record), type=record.levelno)
+            packet = Data(category="log", message=self.format(record), type=record.levelno)
             data_thread.send_data(packet.to_JSON())
             self.flush()
         except NameError:

@@ -12,37 +12,34 @@ window.onload = function() {
 		}
 
 		if (data.category == "log") {
-			var div = document.createElement('div');
 
-			var type;
+			var type = get_log_type(data.type);
+			var message;
 
-			switch (data.type) {
-			case 10:
-				type = "debug";
-				break;
-			case 20:
-				type = "info";
-				break;
-			case 30:
-				type = "warning";
-				break;
-			case 40:
-				type = "error";
-				break;
-			case 50:
-				type = "critical";
-				break;
+			message = (data.message.indexOf("Data sent to the server") > -1) ? "Data sent to the server"
+					: data.message;
 
-			}
-			div.innerHTML = '<span class="' + type + '"></span>' + data.message;
+			var console_message = document.getElementById('console').firstChild;
 
-			var t = document.getElementById('console');
+			if (console_message.innerHTML !== undefined) {
+				var count = console_message.getElementsByTagName('var')[0];
 
-			if (t.firstChild) {
-				t.insertBefore(div, t.firstChild);
+				if (console_message.innerHTML.replace(
+						/<([^>]+?)([^>]*?)>(.*?)<\/\1>/ig, "") == message) {
+					if (isNaN(parseInt(count.innerHTML))) {
+						count.innerHTML = 2;
+					} else {
+						count.innerHTML = parseInt(count.innerHTML) + 1;
+					}
+
+				} else {
+					create_console_entry(type, message);
+				}
+
 			} else {
-				t.appendChild(div);
+				create_console_entry(type, message);
 			}
+
 		}
 
 		if (data.category == "data") {
@@ -62,6 +59,32 @@ window.onload = function() {
 		}
 	};
 
+}
+
+function create_console_entry(type, message) {
+	var div = document.createElement('div');
+
+	div.innerHTML = '<span class="' + type + '"></span>' + message
+			+ '<var></var>';
+
+	document.getElementById('console').insertBefore(div,
+			document.getElementById('console').firstChild);
+}
+
+function get_log_type(level) {
+	switch (level) {
+	case 10:
+		return "debug";
+	case 20:
+		return "info";
+	case 30:
+		return "warning";
+	case 40:
+		return "error";
+	case 50:
+		return "critical";
+
+	}
 }
 
 function set_console_height() {

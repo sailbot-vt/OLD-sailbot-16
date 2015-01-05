@@ -37,6 +37,14 @@ html, body, #map-canvas, #sidebar {
 	margin-top:20px;
 }
 
+#console var {
+	margin-left: 10px;
+	color: #C2C2C2;
+}
+#console var:not(:empty):before {
+    content: "×";
+}
+
 #console span {
 	background-color: rgb(233, 233, 233);
 	-moz-border-radius: 2px;

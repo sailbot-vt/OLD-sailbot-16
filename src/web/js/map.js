@@ -65,8 +65,7 @@ function initialize() {
 		} ]
 	};
 
-	map = new google.maps.Map(document.getElementById('map-canvas'),
-			mapOptions);
+	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
 	boat_marker = new CustomMarker({
 		position : map.getCenter(),
@@ -83,12 +82,13 @@ function update_boat_marker(lat, long) {
 	boat_marker.setPosition(location);
 }
 
-function add_marker(lat, long) {
+function add_marker(type, lat, long) {
 	var location = new google.maps.LatLng(lat, long);
-	
-	marker = new CustomMarker({
+
+	var marker = new CustomMarker({
 		position : location,
 		map : map,
-		content : '<div class="buoy"></div>',
+		content : '<div class="' + type + '"></div>',
 	});
+
 }

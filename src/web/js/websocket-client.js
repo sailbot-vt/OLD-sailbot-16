@@ -8,7 +8,7 @@ window.onload = function() {
 		data = JSON.parse(s.data);
 
 		if (data.category == "marker") {
-			add_marker(data.location.latitude, data.location.longitude);
+			add_marker(data.type, data.location.latitude, data.location.longitude);
 		}
 
 		if (data.category == "log") {

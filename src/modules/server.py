@@ -25,7 +25,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         logging.info('New connection established.')
         
         for marker in locations:
-            location_data = Data(category="marker", location=marker)
+            location_data = Data(category="marker", type="buoy", location=marker)
             self.write_message(location_data.to_JSON())
         
         if self not in wss:

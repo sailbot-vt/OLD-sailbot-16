@@ -1,4 +1,5 @@
-var marker;
+var boat_marker;
+var map;
 
 function initialize() {
 	var mapOptions = {
@@ -64,25 +65,30 @@ function initialize() {
 		} ]
 	};
 
-	var map = new google.maps.Map(document.getElementById('map-canvas'),
+	map = new google.maps.Map(document.getElementById('map-canvas'),
 			mapOptions);
 
-	marker = new CustomMarker({
-        position: map.getCenter(),
-        map: map,
-        content: '<div class="pulse"></div>',
-    });
-
-	var location = new google.maps.LatLng(37.046764, -79.637314)
-	
-	marker.setPosition(location);
+	boat_marker = new CustomMarker({
+		position : map.getCenter(),
+		map : map,
+		content : '<div class="pulse"></div>',
+	});
 
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
 
-function update_boat_marker(lat, long)
-{
-	var location = new google.maps.LatLng(lat, long)
-	marker.setPosition(location);
+function update_boat_marker(lat, long) {
+	var location = new google.maps.LatLng(lat, long);
+	boat_marker.setPosition(location);
+}
+
+function add_marker(lat, long) {
+	var location = new google.maps.LatLng(lat, long);
+	
+	marker = new CustomMarker({
+		position : location,
+		map : map,
+		content : '<div class="pulse"></div>',
+	});
 }

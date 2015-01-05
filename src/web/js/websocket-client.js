@@ -7,6 +7,10 @@ window.onload = function() {
 		// parses the incoming socket message and gets the data from the message
 		data = JSON.parse(s.data);
 
+		if (data.category == "marker") {
+			add_marker(data.location.latitude, data.location.longitude);
+		}
+
 		if (data.category == "log") {
 			var div = document.createElement('div');
 
@@ -33,16 +37,15 @@ window.onload = function() {
 			div.innerHTML = '<span class="' + type + '"></span>' + data.message;
 
 			var t = document.getElementById('console');
-			
+
 			if (t.firstChild) {
 				t.insertBefore(div, t.firstChild);
-			}
-			else {
+			} else {
 				t.appendChild(div);
 			}
 		}
 
-		if(data.category == "data") {
+		if (data.category == "data") {
 			document.getElementById("timestamp").innerHTML = data.timestamp;
 			document.getElementById("lat").innerHTML = data.lat;
 			document.getElementById("long").innerHTML = data.long;
@@ -54,7 +57,7 @@ window.onload = function() {
 			document.getElementById("roll").innerHTML = data.roll;
 			document.getElementById("pitch").innerHTML = data.pitch;
 			document.getElementById("yaw").innerHTML = data.yaw;
-			
+
 			update_boat_marker(data.lat, data.long);
 		}
 	};

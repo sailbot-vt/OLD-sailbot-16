@@ -47,12 +47,13 @@ def get_locations():
     try:
         with open('locations.json', 'r') as myfile:
             json_data = myfile.read().replace('\n', '')
-        locations = json.loads(json_data, object_hook=location_decoder)
+        json_locations = json.loads(json_data, object_hook=location_decoder)
 
         l = []
-        for location in locations:
+        for location in json_locations:
             l.append(location.__str__())
-        
+            locations.append(location)
+            
         logging.info("Loaded the following locations: %s" % l)
     except FileNotFoundError:
 
@@ -140,6 +141,9 @@ class DataThread(threading.Thread):
         logging.info('Starting the data thread!')
         server_thread = ServerThread(name="Server", kwargs={'PORT': PORT})
         server_thread.start()
+        
+        # send the locations loaded from 'locations.json'
+        server_thread.add_locations(locations)
 
         while True:
             server_thread.send_data(data.to_JSON())

@@ -1,4 +1,4 @@
-@import url('http://fonts.googleapis.com/css?Roboto:400,300,500');
+@import url('http://fonts.googleapis.com/css?family=Roboto:400,300,500');
 
 html, body, #map-canvas, #sidebar {
 	height: 100%;
@@ -104,7 +104,7 @@ h1 {
 
 h2 {
 	padding-top: 20px;
-	font-weight: 600;
+	font-weight: 500;
 }
 
 p {

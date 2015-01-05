@@ -71,7 +71,7 @@ function initialize() {
 	boat_marker = new CustomMarker({
 		position : map.getCenter(),
 		map : map,
-		content : '<div class="pulse"></div>',
+		content : '<div class="boat"></div>',
 	});
 
 }
@@ -89,6 +89,6 @@ function add_marker(lat, long) {
 	marker = new CustomMarker({
 		position : location,
 		map : map,
-		content : '<div class="pulse"></div>',
+		content : '<div class="buoy"></div>',
 	});
 }

@@ -15,7 +15,7 @@ import modules.calc
 # Variables and constants
 
 data = Data(
-    category="data",
+    category='data',
     timestamp=0,
     lat=0,
     long=0,
@@ -53,10 +53,9 @@ def get_locations():
         for location in json_locations:
             l.append(location.__str__())
             locations.append(location)
-            
-        logging.info("Loaded the following locations: %s" % l)
-    except FileNotFoundError:
 
+        logging.info('Loaded the following locations: %s' % l)
+    except FileNotFoundError:
         logging.error('The locations JSON file could not be found!')
     except ValueError:
         logging.error('The locations JSON file is malformed!')
@@ -69,52 +68,59 @@ def get_config():
 
     # logging in this method must stay as print statements because the logger
     # has not been defined yet
-    
+
     try:
         config = configparser.ConfigParser()
         config.read('config.ini')
-        
+
         DEBUG = config.getboolean('DEFAULT', 'debug')
         PORT = config.getint('DEFAULT', 'port')
         LOG_NAME = config.get('DEFAULT', 'log_name')
-        TRANSMISSION_DELAY_PERIOD = config.get('DEFAULT', 'transmission_delay')
+        TRANSMISSION_DELAY_PERIOD = config.get('DEFAULT',
+                'transmission_delay')
         EVAL_DELAY_PERIOD = config.get('DEFAULT', 'eval_delay')
-        
-        modules.calc.point_proximity_radius = config.get('LOGIC', 'point_proximity_radius')
+
+        modules.calc.point_proximity_radius = config.get('LOGIC',
+                'point_proximity_radius')
 
         print('Configuration file successfully loaded.')
     except configparser.NoOptionError:
-
         print('The locations configuration file could not be found or is malformed!')
 
+
 class WebSocketLogger(logging.StreamHandler):
+
     """
     A handler class which allows the cursor to stay on
     one line for selected messages
     """
+
     def emit(self, record):
         try:
-            packet = Data(category="log", message=self.format(record), type=record.levelno)
+            packet = Data(category='log', message=self.format(record),
+                          type=record.levelno)
             data_thread.send_data(packet.to_JSON())
             self.flush()
         except NameError:
-            print("The server thread has not been created yet. Dropping log output.")
+            print('The server thread has not been created yet. Dropping log output.')
         except:
             self.handleError(record)
-            
-            
+
+
 def setup_config():
     if DEBUG:
-        LOG_FORMAT = "[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s"
-        
-        logging.basicConfig(filename=LOG_NAME, format=LOG_FORMAT, datefmt='%H:%M:%S', level=logging.DEBUG)
- 
+        LOG_FORMAT = \
+            '[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s'
+
+        logging.basicConfig(filename=LOG_NAME, format=LOG_FORMAT,
+                            datefmt='%H:%M:%S', level=logging.DEBUG)
+
         root = logging.StreamHandler()
-        root.setFormatter(logging.Formatter(LOG_FORMAT, "%H:%M:%S"))
-        
+        root.setFormatter(logging.Formatter(LOG_FORMAT, '%H:%M:%S'))
+
         logging.getLogger().addHandler(root)
         logging.getLogger().addHandler(WebSocketLogger())
-        
+
         logging.info('-------------------------------')
         logging.info('Log started on: %s'
                      % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -126,28 +132,34 @@ class DataThread(threading.Thread):
 
     """ Transmits the data object to the server thread
     """
-    server_thread = None;
-    
+
+    server_thread = None
+
     def send_data(self, data):
+
         # do not log any data here, doing so would create an infinite loop
+
         try:
             server_thread.send_data(data)
         except tornado.websocket.WebSocketClosedError:
-            print("Could not send data because the socket is closed.")
+            print('Could not send data because the socket is closed.')
 
     def run(self):
         global server_thread
-        
+
         logging.info('Starting the data thread!')
-        server_thread = ServerThread(name="Server", kwargs={'PORT': PORT})
+        server_thread = ServerThread(name='Server',
+                kwargs={'PORT': PORT})
         server_thread.start()
-        
+
         # send the locations loaded from 'locations.json'
+
         server_thread.add_locations(locations)
 
         while True:
             server_thread.send_data(data.to_JSON())
-            logging.info('Data sent to the server %s' % json.dumps(json.loads(data.to_JSON())))
+            logging.info('Data sent to the server %s'
+                         % json.dumps(json.loads(data.to_JSON())))
             time.sleep(TRANSMISSION_DELAY_PERIOD)
 
 
@@ -185,25 +197,26 @@ class MotorThread(threading.Thread):
 
 
 ## ----------------------------------------------------------
-if __name__=="__main__":
+
+if __name__ == '__main__':
     try:
         threading.current_thread().setName('Main')
-        
+
         get_config()
         setup_config()
         get_locations()
-        
+
         logging.info('Beginning SailBOT autonomous navigation routines....')
-        
-        data_thread = DataThread(name="Data")
-        motor_thread = MotorThread(name="Motor")
-        logic_thread = LogicThread(name="Logic")
-        
+
+        data_thread = DataThread(name='Data')
+        motor_thread = MotorThread(name='Motor')
+        logic_thread = LogicThread(name='Logic')
+
         data_thread.start()
         motor_thread.start()
         logic_thread.start()
-        
     except KeyboardInterrupt:
-        logging.critical("Program terminating!")
-    
+        logging.critical('Program terminating!')
 
+
+            

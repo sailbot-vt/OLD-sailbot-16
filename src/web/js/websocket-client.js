@@ -1,14 +1,15 @@
 window.onload = function() {
 
-	socket = new WebSocket('ws://127.0.0.1:8888/ws');
+	var socket = new WebSocket('ws://127.0.0.1:8888/ws');
 
 	socket.onmessage = function(s) {
 
 		// parses the incoming socket message and gets the data from the message
-		data = JSON.parse(s.data);
+		var data = JSON.parse(s.data);
 
 		if (data.category == "marker") {
-			add_marker(data.type, data.location.latitude, data.location.longitude);
+			add_marker(data.type, data.location.latitude,
+					data.location.longitude);
 		}
 
 		if (data.category == "log") {
@@ -59,13 +60,12 @@ window.onload = function() {
 		}
 	};
 
-}
+};
 
 function create_console_entry(type, message) {
 	var div = document.createElement('div');
 
-	div.innerHTML = '<span class="' + type + '"></span>' + message
-			+ '<var></var>';
+	div.innerHTML = '<span class="' + type + '"></span>' + message + '<var></var>';
 
 	document.getElementById('console').insertBefore(div,
 			document.getElementById('console').firstChild);
@@ -91,8 +91,7 @@ function set_console_height() {
 	var h = document.getElementById("panel");
 	var j = document.getElementById("console");
 
-	document.getElementById("console").style.height = (document.body.scrollHeight - (h.clientHeight + 60))
-			+ 'px';
+	j.style.height = (document.body.scrollHeight - (h.clientHeight + 60)) + 'px';
 	// there's 20px of padding around the panel div unaccounted for in addition
 	// to the 20px padding offset
 	// there's also a 20pc gap between the information above the console and the

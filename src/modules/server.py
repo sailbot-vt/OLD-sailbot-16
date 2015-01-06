@@ -23,11 +23,11 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
         logging.info('New connection established.')
-        
+
         for marker in locations:
-            location_data = Data(category="marker", type="buoy", location=marker)
+            location_data = Data(category='marker', type='buoy', location=marker)
             self.write_message(location_data.to_JSON())
-        
+
         if self not in wss:
             wss.append(self)
 
@@ -64,13 +64,16 @@ class ServerThread(threading.Thread):
 
     """ Creates thread which runs the web socket server
     """
+
     def add_locations(self, markers):
         for marker in markers:
             locations.append(marker)
-            
+
     def send_data(self, message):
         for ws in wss:
+
             # do not log any data here, doing so would create an infinite loop
+
             try:
                 ws.write_message(message)
                 break
@@ -84,7 +87,7 @@ class ServerThread(threading.Thread):
 
     def run(self):
         logging.info('Starting server.')
-            
+
         try:
             http_server = tornado.httpserver.HTTPServer(application)
             http_server.listen(self._kwargs['PORT'])
@@ -98,5 +101,6 @@ class ServerThread(threading.Thread):
 
             main_loop.start()
         except OSError:
-
             logging.error('The web server failed to bind to the port!')
+
+

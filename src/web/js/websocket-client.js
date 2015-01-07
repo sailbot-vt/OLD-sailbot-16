@@ -45,10 +45,10 @@ window.onload = function() {
 
 		if (data.category == "data") {
 			document.getElementById("timestamp").innerHTML = data.timestamp;
-			document.getElementById("lat").innerHTML = data.lat;
-			document.getElementById("long").innerHTML = data.long;
-			document.getElementById("target_lat").innerHTML = data.target_lat;
-			document.getElementById("target_long").innerHTML = data.target_long;
+			document.getElementById("lat").innerHTML = data.location.latitude;
+			document.getElementById("long").innerHTML = data.location.longitude;
+			document.getElementById("target_lat").innerHTML = data.target_location.latitude;
+			document.getElementById("target_long").innerHTML = data.target_location.longitude;
 			document.getElementById("heading").innerHTML = data.heading;
 			document.getElementById("speed").innerHTML = data.speed;
 			document.getElementById("wind_dir").innerHTML = data.wind_dir;
@@ -56,7 +56,7 @@ window.onload = function() {
 			document.getElementById("pitch").innerHTML = data.pitch;
 			document.getElementById("yaw").innerHTML = data.yaw;
 
-			update_boat_marker(data.lat, data.long);
+			// update_boat_marker(data.location.latitude, data.location.longitude);
 		}
 	};
 

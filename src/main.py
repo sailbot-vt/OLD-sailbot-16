@@ -17,10 +17,8 @@ import modules.calc
 data = Data(
     category='data',
     timestamp=0,
-    lat=0,
-    long=0,
-    target_lat=0,
-    target_long=0,
+    location=Location(0, 0),
+    target_location=Location(0, 0),
     heading=0,
     speed=0,
     wind_dir=0,
@@ -161,8 +159,7 @@ class DataThread(threading.Thread):
         while True:
             
             if ((count % 4) == 0):
-                marker = Location(data.latitude, data.longitude)
-                location_data = Data(category='marker', type='tracking', location=marker)
+                location_data = Data(category='marker', type='tracking', location=data.location)
                 server_thread.send_data(location_data.to_JSON())
                 
             server_thread.send_data(data.to_JSON())

@@ -119,6 +119,20 @@ hr {
 }
 
 /* ------------------------------- */
+
+.tracking {
+	background: #000;
+    border-radius: 50%;
+    height: 8px;
+    width: 8px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -4px 0px 0px -4px;
+    z-index: -2;
+}
+
+/* ------------------------------- */
 .buoy {
     background: #ff5522;
     border-radius: 50%;
@@ -191,6 +205,8 @@ hr {
         -webkit-transform: scale(1);
     }
 }
+
+/* ------------------------------- */
 
 .boat {
 	background: #000;

@@ -156,10 +156,19 @@ class DataThread(threading.Thread):
 
         server_thread.add_locations(locations)
 
+        count = 0;
+        
         while True:
+            
+            if ((count % 4) == 0):
+                marker = Location(data.latitude, data.longitude)
+                location_data = Data(category='marker', type='tracking', location=marker)
+                server_thread.send_data(location_data.to_JSON())
+                
             server_thread.send_data(data.to_JSON())
             logging.info('Data sent to the server %s'
                          % json.dumps(json.loads(data.to_JSON())))
+            count += 1
             time.sleep(TRANSMISSION_DELAY_PERIOD)
 
 

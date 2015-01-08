@@ -56,7 +56,7 @@ window.onload = function() {
 			document.getElementById("pitch").innerHTML = data.pitch;
 			document.getElementById("yaw").innerHTML = data.yaw;
 
-			// update_boat_marker(data.location.latitude, data.location.longitude);
+			update_boat_marker(data.location.latitude, data.location.longitude);
 		}
 	};
 

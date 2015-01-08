@@ -123,13 +123,21 @@ hr {
 .tracking {
 	background: #000;
     border-radius: 50%;
-    height: 8px;
-    width: 8px;
+    height: 4px;
+    width: 4px;
     position: absolute;
     left: 50%;
     top: 50%;
-    margin: -4px 0px 0px -4px;
+    margin: -2px 0px 0px -2px;
     z-index: -2;
+    opacity: 0.4;
+    
+    -webkit-animation: static_animation 1s ease-out;
+    animation: static_animation 1s ease-out;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    -webkit-animation-delay: 1.1s;
+    animation-delay: 1.1s;
 }
 
 /* ------------------------------- */
@@ -144,15 +152,15 @@ hr {
     margin: -7px 0px 0px -7px;
     z-index: -2;
     
-    -webkit-animation: buoy_animation 1s ease-out;
-    animation: buoy_animation 1s ease-out;
+    -webkit-animation: static_animation 1s ease-out;
+    animation: static_animation 1s ease-out;
     -webkit-animation-iteration-count: infinite;
     animation-iteration-count: infinite;
     -webkit-animation-delay: 1.1s;
     animation-delay: 1.1s;
 }
 
-@-webkit-keyframes buoy_animation {
+@-webkit-keyframes static_animation {
     0% {
         -webkit-transform: scale(1);
     }
@@ -179,7 +187,7 @@ hr {
     }
 }
 
-@keyframes buoy_animation {
+@keyframes static_animation {
     0% {
         -webkit-transform: scale(1);
     }

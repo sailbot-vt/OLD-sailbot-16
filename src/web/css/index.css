@@ -37,6 +37,22 @@ html, body, #map-canvas, #sidebar {
 	margin-top:20px;
 }
 
+#console div {
+	-webkit-animation: move_in 0.25s ease-out;
+    animation: move_in 0.25s ease-out;
+}
+
+@-webkit-keyframes move_in {
+    0% {
+        height: 0px;
+        opacity: 0;
+    }
+    100% {
+        height: 30px;
+        opacity: 1;
+    }
+}
+
 #console var {
 	margin-left: 10px;
 	color: #C2C2C2;
@@ -189,28 +205,28 @@ hr {
 
 @keyframes static_animation {
     0% {
-        -webkit-transform: scale(1);
+        transform: scale(1);
     }
     30% {
-        -webkit-transform: scale(1);
+        transform: scale(1);
     }
     40% {
-        -webkit-transform: scale(1.02);
+        transform: scale(1.02);
     }
     50% {
-        -webkit-transform: scale(1.04);
+        transform: scale(1.04);
     }
     60% {
-        -webkit-transform: scale(1.06);
+        transform: scale(1.06);
     }
     70% {
-        -webkit-transform: scale(1.04);
+        transform: scale(1.04);
     }
     80% {
-        -webkit-transform: scale(1.02);
+        transform: scale(1.02);
     }
     100% {
-        -webkit-transform: scale(1);
+        transform: scale(1);
     }
 }
 
@@ -249,7 +265,6 @@ hr {
 @-webkit-keyframes boat_animation {
   0% {
     -webkit-transform: scale(0.1, 0.1);
-            transform: scale(0.1, 0.1);
     opacity: 0;
     filter: alpha(opacity=0);
   }
@@ -261,7 +276,6 @@ hr {
 
   100% {
     -webkit-transform: scale(1.2, 1.2);
-            transform: scale(1.2, 1.2);
     opacity: 0;
     filter: alpha(opacity=0);
   }
@@ -269,8 +283,7 @@ hr {
 
 @keyframes boat_animation {
   0% {
-    -webkit-transform: scale(0.1, 0.1);
-            transform: scale(0.1, 0.1);
+    transform: scale(0.1, 0.1);
     opacity: 0;
     filter: alpha(opacity=0);
   }
@@ -281,8 +294,7 @@ hr {
   }
 
   100% {
-    -webkit-transform: scale(1.2, 1.2);
-            transform: scale(1.2, 1.2);
+    transform: scale(1.2, 1.2);
     opacity: 0;
     filter: alpha(opacity=0);
   }

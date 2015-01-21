@@ -15,10 +15,7 @@ window.onload = function() {
 		if (data.category == "log") {
 
 			var type = get_log_type(data.type);
-			var message;
-
-			message = (data.message.indexOf("Data sent to the server") > -1) ? "Data sent to the server"
-					: data.message;
+			var message = data.message.replace(/\{[^]+\}+/g, '');
 
 			var console_message = document.getElementById('console').firstChild;
 

@@ -11,6 +11,7 @@ from datetime import datetime
 import tornado.websocket
 import modules.calc
 import modules.utils
+import modules.logging
 
 # Variables and constants
 
@@ -73,25 +74,6 @@ def get_config():
     except configparser.NoOptionError:
         print('The locations configuration file could not be found or is malformed!')
 
-
-class WebSocketLogger(logging.StreamHandler):
-
-    """
-    A handler class which allows the cursor to stay on
-    one line for selected messages
-    """
-
-    def emit(self, record):
-        try:
-            packet = {'category': 'log', 'message': self.format(record), 'type': record.levelno}
-            data_thread.send_data(modules.utils.getJSON(packet))
-            self.flush()
-        except NameError:
-            print('The server thread has not been created yet. Dropping log output.')
-        except:
-            self.handleError(record)
-
-
 def setup_config():
     if DEBUG:
         LOG_FORMAT = \
@@ -104,7 +86,6 @@ def setup_config():
         root.setFormatter(logging.Formatter(LOG_FORMAT, '%H:%M:%S'))
 
         logging.getLogger().addHandler(root)
-        logging.getLogger().addHandler(WebSocketLogger())
 
         logging.info('-------------------------------')
         logging.info('Log started on: %s'
@@ -132,6 +113,7 @@ class DataThread(threading.Thread):
     def run(self):
         global server_thread
 
+        logging.getLogger().addHandler(modules.logging.WebSocketLogger(self))
         logging.info('Starting the data thread!')
         server_thread = ServerThread(name='Server', kwargs={'PORT': PORT})
         server_thread.start()

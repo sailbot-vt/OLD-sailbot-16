@@ -2,7 +2,6 @@
 
 import time
 from modules.server import ServerThread
-from modules.data import Data
 import threading
 import json
 from modules.location import Location
@@ -11,23 +10,13 @@ import logging
 from datetime import datetime
 import tornado.websocket
 import modules.calc
+import modules.utils
 
 # Variables and constants
 
-data = Data(
-    category='data',
-    timestamp=0,
-    location=Location(0, 0),
-    target_location=Location(0, 0),
-    heading=0,
-    speed=0,
-    wind_dir=0,
-    roll=0,
-    pitch=0,
-    yaw=0,
-    state=0,
-    )
-servos = Data(rutter=0, sail=0)
+data = {'category': 'data', 'timestamp': 0, 'location': Location(0, 0),
+        'target_location': Location(0, 0), 'heading': 0, 'speed': 0,
+        'wind_dir': 0, 'roll': 0, 'pitch': 0, 'yaw': 0, 'state': 0}
 locations = []
 
 DEBUG = False
@@ -39,7 +28,6 @@ EVAL_DELAY_PERIOD = 30
 
 def location_decoder(obj):
     return Location(obj['latitude'], obj['longitude'])
-
 
 def get_locations():
     try:
@@ -95,9 +83,8 @@ class WebSocketLogger(logging.StreamHandler):
 
     def emit(self, record):
         try:
-            packet = Data(category='log', message=self.format(record),
-                          type=record.levelno)
-            data_thread.send_data(packet.to_JSON())
+            packet = {'category': 'log', 'message': self.format(record), 'type': record.levelno}
+            data_thread.send_data(modules.utils.getJSON(packet))
             self.flush()
         except NameError:
             print('The server thread has not been created yet. Dropping log output.')
@@ -146,8 +133,7 @@ class DataThread(threading.Thread):
         global server_thread
 
         logging.info('Starting the data thread!')
-        server_thread = ServerThread(name='Server',
-                kwargs={'PORT': PORT})
+        server_thread = ServerThread(name='Server', kwargs={'PORT': PORT})
         server_thread.start()
 
         # send the locations loaded from 'locations.json'
@@ -158,20 +144,29 @@ class DataThread(threading.Thread):
         
         while True:
             
-            if ((count % 4) == 0):
-                location_data = Data(category='marker', type='tracking', location=data.location)
-                server_thread.send_data(location_data.to_JSON())
-                
-            server_thread.send_data(data.to_JSON())
+            server_thread.send_data(modules.utils.getJSON(data))
             logging.info('Data sent to the server %s'
-                         % json.dumps(json.loads(data.to_JSON())))
+                         % json.dumps(json.loads(modules.utils.getJSON(data))))
             count += 1
             time.sleep(TRANSMISSION_DELAY_PERIOD)
 
+class SensorThread(threading.Thread):
+    
+    def run(self):
+        while True:
+            
+            time.sleep(1)
+            pass
 
 ## ----------------------------------------------------------
 
 class LogicThread(threading.Thread):
+
+    def run(self):
+        pass
+
+
+class WinchThread(threading.Thread):
 
     def run(self):
         pass

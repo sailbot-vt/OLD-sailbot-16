@@ -90,12 +90,12 @@ class ServerThread(threading.Thread):
 
         try:
             http_server = tornado.httpserver.HTTPServer(application)
-            http_server.listen(self._kwargs['PORT'])
+            http_server.listen(self._kwargs['port'])
 
             main_loop = tornado.ioloop.IOLoop.instance()
 
             logging.info('The web server successfully bound to port %d'
-                         % self._kwargs['PORT'])
+                         % self._kwargs['port'])
 
             # starts the main IO loop
 

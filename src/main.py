@@ -8,6 +8,10 @@ from modules.location import Location
 import logging
 import tornado.websocket
 import modules.calc
+try:
+    import modules.gps
+except ImportError:
+    pass
 import modules.utils
 import modules.logging
 
@@ -44,14 +48,24 @@ class DataThread(threading.Thread):
     def run(self):
         global server_thread
 
+        # set up logging
         logging.getLogger().addHandler(modules.logging.WebSocketLogger(self))
+        
         logging.info('Starting the data thread!')
+        
+        # set up server
         server_thread = ServerThread(name='Server', kwargs={'port': values['port']})
         server_thread.start()
 
         # send the locations loaded from 'locations.json'
-
         server_thread.add_locations(locations)
+        
+        # start logging GPS data
+        try:
+            gpsp = modules.gps.GPSPoller()
+            gpsp.start()
+        except NameError:
+            logging.critical("GPS not configured properly!")
         
         while True:
             server_thread.send_data(modules.utils.getJSON(data))
@@ -80,6 +94,8 @@ class WinchThread(threading.Thread):
 
     def run(self):
         pass
+
+
 
 
 ## ----------------------------------------------------------

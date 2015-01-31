@@ -52,16 +52,13 @@ class DataThread(threading.Thread):
         # send the locations loaded from 'locations.json'
 
         server_thread.add_locations(locations)
-
-        count = 0;
         
         while True:
-            
             server_thread.send_data(modules.utils.getJSON(data))
-            logging.info('Data sent to the server %s'
+            logging.debug('Data sent to the server %s'
                          % json.dumps(json.loads(modules.utils.getJSON(data))))
-            count += 1
             time.sleep(float(values['transmission_delay']))
+            
 
 class SensorThread(threading.Thread):
     

@@ -72,30 +72,6 @@ class DataThread(threading.Thread):
             logging.debug('Data sent to the server %s'
                          % json.dumps(json.loads(modules.utils.getJSON(data))))
             time.sleep(float(values['transmission_delay']))
-            
-
-class SensorThread(threading.Thread):
-    
-    def run(self):
-        while True:
-            
-            time.sleep(1)
-            pass
-
-## ----------------------------------------------------------
-
-class LogicThread(threading.Thread):
-
-    def run(self):
-        pass
-
-
-class WinchThread(threading.Thread):
-
-    def run(self):
-        pass
-
-
 
 
 ## ----------------------------------------------------------
@@ -136,11 +112,9 @@ if __name__ == '__main__':
 
         data_thread = DataThread(name='Data')
         motor_thread = MotorThread(name='Motor')
-        logic_thread = LogicThread(name='Logic')
 
         data_thread.start()
         motor_thread.start()
-        logic_thread.start()
     except KeyboardInterrupt:
         logging.critical('Program terminating!')
 

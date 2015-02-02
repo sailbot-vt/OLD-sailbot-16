@@ -18,9 +18,11 @@ import modules.logging
 # Variables and constants
 
 data = {'category': 'data', 'timestamp': 0, 'location': Location(0, 0),
-        'target_location': Location(0, 0), 'heading': 0, 'speed': 0,
-        'wind_dir': 0, 'roll': 0, 'pitch': 0, 'yaw': 0, 'state': 0}
-locations = []
+        'heading': 0, 'speed': 0, 'wind_dir': 0, 'roll': 0, 'pitch': 0,
+        'yaw': 0, 'state': 0}
+
+target_locations = []
+boundary_locations = []
 
 values = {'debug': False, 'port': 8888, 'log_name': 'sailbot.log',
           'transmission_delay': 5, 'eval_delay': 30}
@@ -54,11 +56,8 @@ class DataThread(threading.Thread):
         logging.info('Starting the data thread!')
         
         # set up server
-        server_thread = ServerThread(name='Server', kwargs={'port': values['port']})
+        server_thread = ServerThread(name='Server', kwargs={'port': values['port'], 'target_locations': target_locations, 'boundary_locations': boundary_locations})
         server_thread.start()
-
-        # send the locations loaded from 'locations.json'
-        server_thread.add_locations(locations)
         
         # start logging GPS data
         try:
@@ -106,7 +105,7 @@ if __name__ == '__main__':
         threading.current_thread().setName('Main')
 
         modules.utils.setup_config(values)
-        modules.utils.setup_locations(locations)
+        modules.utils.setup_locations(target_locations, boundary_locations)
 
         logging.info('Beginning SailBOT autonomous navigation routines....')
 

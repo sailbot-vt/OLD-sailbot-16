@@ -10,8 +10,9 @@ import logging
 import modules.utils
 
 wss = []
-locations = []
 
+target_locations = []
+boundary_locations = []
 
 class WSHandler(tornado.websocket.WebSocketHandler):
 
@@ -24,8 +25,12 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         logging.info('New connection established.')
 
-        for marker in locations:
-            location_data = {'category': 'marker', 'type': 'buoy', 'location': marker}
+        for marker in target_locations:
+            location_data = {'category': 'marker', 'type': 'target', 'location': marker}
+            self.write_message(modules.utils.getJSON(location_data))
+
+        for marker in boundary_locations:
+            location_data = {'category': 'marker', 'type': 'boundary', 'location': marker}
             self.write_message(modules.utils.getJSON(location_data))
 
         if self not in wss:
@@ -65,10 +70,6 @@ class ServerThread(threading.Thread):
     """ Creates thread which runs the web socket server
     """
 
-    def add_locations(self, markers):
-        for marker in markers:
-            locations.append(marker)
-
     def send_data(self, message):
         for ws in wss:
 
@@ -86,7 +87,14 @@ class ServerThread(threading.Thread):
             ws.close()
 
     def run(self):
+        global target_locations
+        global boundary_locations
+        
         logging.info('Starting server.')
+        
+        # defining the locations array
+        target_locations = self._kwargs['target_locations']
+        boundary_locations = self._kwargs['boundary_locations']
 
         try:
             http_server = tornado.httpserver.HTTPServer(application)

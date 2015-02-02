@@ -11,18 +11,24 @@ def getJSON(obj):
 def location_decoder(obj):
     return Location(obj['latitude'], obj['longitude'])
 
-def setup_locations(locations):
+def setup_locations(target_locations, boundary_locations):
     try:
         with open('locations.json', 'r') as myfile:
-            json_data = myfile.read().replace('\n', '')
-        json_locations = json.loads(json_data, object_hook=location_decoder)
+            json_data = json.loads(myfile.read().replace('\n', ''))
 
-        l = []
-        for location in json_locations:
-            l.append(location.__str__())
-            locations.append(location)
-
-        logging.info('Loaded the following locations: %s' % l)
+        i = []
+        j = []
+        
+        for location in json_data['target_locations']:
+            target_locations.append(location_decoder(location))
+            i.append(location_decoder(location).__str__())
+        for location in json_data['boundary_locations']:
+            boundary_locations.append(location_decoder(location))
+            j.append(location_decoder(location).__str__())
+            
+        logging.info("Loaded the following target locations: %s" % i)
+        logging.info("Loaded the following boundary locations: %s" % j)
+        
     except FileNotFoundError:
         logging.error('The locations JSON file could not be found!')
     except ValueError:

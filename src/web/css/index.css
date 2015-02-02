@@ -157,7 +157,26 @@ hr {
 }
 
 /* ------------------------------- */
-.buoy {
+.target {
+    background: rgb(136, 196, 37);
+    border-radius: 50%;
+    height: 14px;
+    width: 14px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -7px 0px 0px -7px;
+    z-index: -2;
+    
+    -webkit-animation: static_animation 1s ease-out;
+    animation: static_animation 1s ease-out;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    -webkit-animation-delay: 1.1s;
+    animation-delay: 1.1s;
+}
+
+.boundary {
     background: #ff5522;
     border-radius: 50%;
     height: 14px;

@@ -9,23 +9,24 @@ import math
 
 point_proximity_radius = 5
 
-def direction_to_point(current, target):
-    a = math.radians(current.latitude)
-    b = math.radians(target.latitude)
-    d = math.radians(target.longitude - current.longitude)
+def direction_to_point(current_point, target_point):
+    a = math.radians(current_point.latitude)
+    b = math.radians(target_point.latitude)
+    d = math.radians(target_point.longitude - current_point.longitude)
     
     y = math.sin(d) * math.cos(b)
     x = math.cos(a) * math.sin(b) - math.sin(a) * math.cos(b) * math.cos(d)
     
     return (math.degrees(math.atan2(y, x)) + 360) % 360
 
-def point_proximity(current, target):
-    a = math.sin(math.radians(current.latitude))
-    b = math.sin(math.radians(target.latitude))
-    c = math.cos(math.radians(current.latitude))
-    d = math.cos(math.radians(target.latitude))
+
+def point_proximity(current_point, target_point):
+    a = math.sin(math.radians(current_point.latitude))
+    b = math.sin(math.radians(target_point.latitude))
+    c = math.cos(math.radians(current_point.latitude))
+    d = math.cos(math.radians(target_point.latitude))
     
-    e = a * b + c * d * math.cos((math.radians(target.longitude - current.longitude)))
+    e = a * b + c * d * math.cos((math.radians(target_point.longitude - current_point.longitude)))
     f = math.acos(e)
     distance = f * 6371 * 1000
     

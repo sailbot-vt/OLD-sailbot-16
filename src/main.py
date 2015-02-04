@@ -8,6 +8,9 @@ from modules.location import Location
 import logging
 import tornado.websocket
 import modules.calc
+import math
+from modules.calc import direction_to_point
+from pickle import FALSE
 try:
     import modules.gps
 except ImportError:
@@ -25,7 +28,8 @@ target_locations = []
 boundary_locations = []
 
 values = {'debug': False, 'port': 8888, 'log_name': 'sailbot.log',
-          'transmission_delay': 5, 'eval_delay': 30}
+          'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
+          'direction': 0, 'absolute_wind_direction': 0}
 
 
 
@@ -75,6 +79,55 @@ class DataThread(threading.Thread):
 
 ## ----------------------------------------------------------
 
+class LogicThread(threading.Thread):
+
+    preferred_tack = 0 # -1 means left tack and 1 means right tack; 0 not on a tack
+    
+    def run(self):
+        logging.info('Beginning autonomous navigation routines....')
+        
+        while True:
+            # update direction
+            values['direction'] = modules.calc.direction_to_point(values['location'], target_locations[0])
+            values['absolute_wind_direction'] = data['wind_dir'] + data['heading']
+            
+            time.sleep(values['eval_delay'])
+            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d" % data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'])
+            
+            if self.sailable(target_locations[0]):
+                current_desired_heading = values['direction']
+                preferred_tack = 0
+                
+            else:
+    
+                if preferred_tack == 0:  # if the target is not sailable and you haven't chosen a tack, choose one
+                    preferred_tack = (180 - data['heading']) / math.fabs(180 - data['heading'])
+    
+                if preferred_tack == -1:  # if the boat is on a left-of-wind tack
+                    current_desired_heading = (data['heading'] - 45 + 360) % 360
+                    
+                elif preferred_tack == 1: # if the boat is on a right-of-wind tack
+                    current_desired_heading = (data['heading']  + 45 + 360) % 360
+                    
+                else:
+                    logging.error('The preferred_tack was %d' % preferred_tack)
+                    
+    def sailable(self, target_location):
+        angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'] + 360) % 360
+        
+        if(math.fabs(angle_of_target_off_the_wind) < 45):
+            return False
+        
+        return True
+        
+    
+                
+
+## ----------------------------------------------------------
+
+def turn_rutter_to(angle):
+    pass
+
 class MotorThread(threading.Thread):
 
     def set(self, property, value):
@@ -107,13 +160,13 @@ if __name__ == '__main__':
         modules.utils.setup_config(values)
         modules.utils.setup_locations(target_locations, boundary_locations)
 
-        logging.info('Beginning SailBOT autonomous navigation routines....')
+        logging.info('Starting SailBOT!')
 
-        data_thread = DataThread(name='Data')
-        motor_thread = MotorThread(name='Motor')
+        data_thread = DataThread(name='Data').start()
+        motor_thread = MotorThread(name='Motor').start()
+        time.sleep(10)
+        logic_thread = LogicThread(name='Logic').start()
 
-        data_thread.start()
-        motor_thread.start()
     except KeyboardInterrupt:
         logging.critical('Program terminating!')
 

@@ -19,6 +19,10 @@ def direction_to_point(current_point, target_point):
     
     return (math.degrees(math.atan2(y, x)) + 360) % 360
 
+def get_heading_angle(heading, current_point, target_point):
+    angle = direction_to_point(current_point, target_point)
+    
+    return heading - angle
 
 def point_proximity(current_point, target_point):
     a = math.sin(math.radians(current_point.latitude))

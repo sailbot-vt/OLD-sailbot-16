@@ -109,6 +109,8 @@ class ServerThread(threading.Thread):
 
             main_loop.start()
         except OSError:
-            logging.error('The web server failed to bind to the port!')
+            logging.critical('The web server failed to bind to the port!')
+        except Exception:
+            logging.critical('The web server failed to start!')
 
 

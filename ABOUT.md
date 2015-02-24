@@ -28,7 +28,7 @@ Make sure you have created a GitHub account. Email one of the SailBOT leads with
 
 **Clone**
 
-Code is stored in the GitHub repository. It is synced with the code stored locally on your computer. When you make a change you create a *commit*. This commit is *pushed* to the GitHub server and the repository updates. Other collaborators will *pull* your commit down and their local versions will also updates.
+Code is stored in the GitHub repository. It is synced with the code stored locally on your computer. When you make a change you create a *commit*. This commit is *pushed* to the GitHub server and the repository updates. Other collaborators will *pull* your commit down and their local versions will also update.
 
 The GUI version of the program makes this process super simple. Once you are added to the repository, click <kbd>+</kbd> to add a new repository then click the <kbd>clone</kbd> tab. Select the SailBOT repository. Clone the repository wherever you would like.
 >Note: if you want to use an IDE to code in (highly reccomended), clone the project in your IDE's root folder. Then, <kbd>file</kbd> > <kbd>import</kbd> the project into the IDE. I don't recommend cloning the repository through the IDE itself.

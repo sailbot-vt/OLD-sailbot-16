@@ -89,6 +89,6 @@ function set_console_height() {
 	j.style.height = (document.body.scrollHeight - (h.clientHeight + 60)) + 'px';
 	// there's 20px of padding around the panel div unaccounted for in addition
 	// to the 20px padding offset
-	// there's also a 20pc gap between the information above the console and the
+	// there's also a 20px gap between the information above the console and the
 	// console itself
 }

@@ -25,7 +25,7 @@ cd ..
 rm -r tornado-4.1/
 rm tornado-4.1.tar.gz
 
-echo '\033[94m\033[1mPulling project from repository...\033[0m\033[39m’
+echo '\033[94m\033[1mPulling project from repository...\033[0m\033[39m'
 cd ~/
 mkdir SailBOT
 cd SailBOT

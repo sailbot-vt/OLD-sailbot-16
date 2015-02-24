@@ -15,12 +15,6 @@ class Location(object):
     def __str__(self):
         return '(%s, %s)' % (self.latitude, self.longitude)
 
-    def get_latitude(self):
-        return self.latitude
-
-    def get_longitude(self):
-        return self.longitude
-
     def to_JSON(self):
         return json.dumps(self, default=lambda o: o.__dict__,
                           sort_keys=True, indent=4)

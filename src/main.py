@@ -10,19 +10,18 @@ import tornado.websocket
 import modules.calc
 import math
 from modules.calc import direction_to_point
-from pickle import FALSE
-try:
-    import modules.gps
-except ImportError:
-    pass
 import modules.utils
-import modules.logging
+import modules.log
+import socket
+import sys
+import socketserver
+
 
 # Variables and constants
 
 data = {'category': 'data', 'timestamp': 0, 'location': Location(0, 0),
         'heading': 0, 'speed': 0, 'wind_dir': 0, 'roll': 0, 'pitch': 0,
-        'yaw': 0, 'state': 0}
+        'yaw': 0}
 
 target_locations = []
 boundary_locations = []
@@ -34,7 +33,7 @@ values = {'debug': False, 'port': 8888, 'log_name': 'sailbot.log',
 
 
 ## ----------------------------------------------------------
-
+    
 class DataThread(threading.Thread):
 
     """ Transmits the data object to the server thread
@@ -55,7 +54,7 @@ class DataThread(threading.Thread):
         global server_thread
 
         # set up logging
-        logging.getLogger().addHandler(modules.logging.WebSocketLogger(self))
+        logging.getLogger().addHandler(modules.log.WebSocketLogger(self))
         
         logging.info('Starting the data thread!')
         
@@ -63,22 +62,47 @@ class DataThread(threading.Thread):
         server_thread = ServerThread(name='Server', kwargs={'port': values['port'], 'target_locations': target_locations, 'boundary_locations': boundary_locations})
         server_thread.start()
         
-        # start logging GPS data
+        
+        HOST, PORT = "localhost", 8907
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
         try:
-            gpsp = modules.gps.GPSPoller()
-            gpsp.start()
-        except NameError:
-            logging.critical("GPS not configured properly!")
+            sock.connect((HOST, PORT))
+        except ConnectionRefusedError:
+            logging.critical('Connection to the GPS socket was refused!')
         
         while True:
-            server_thread.send_data(modules.utils.getJSON(data))
-            logging.debug('Data sent to the server %s'
-                         % json.dumps(json.loads(modules.utils.getJSON(data))))
+            
+            try:
+                sock.send(str(0).encode('utf-8'))
+                received = sock.recv(1024)
+                
+                # parse the data from the server
+                parsed = json.loads(received.decode('utf-8'))
+                
+                # update the data object with known fields
+                data.update(parsed)
+                
+                # updates the location in the data object
+                data.location = Location(parsed.latitude, parsed.longitude)
+                
+                # send data to the server
+                server_thread.send_data(modules.utils.getJSON(data))
+                logging.debug('Data sent to the server %s'
+                             % json.dumps(json.loads(modules.utils.getJSON(data))))
+                
+            except BrokenPipeError:
+                logging.error('The GPS socket is broken!')
+                
+            except ValueError:
+                logging.critical('The GPS data received from the server was malformed!')
+
             time.sleep(float(values['transmission_delay']))
+
+            
 
 
 ## ----------------------------------------------------------
-
 class LogicThread(threading.Thread):
 
     preferred_tack = 0 # -1 means left tack and 1 means right tack; 0 not on a tack
@@ -88,11 +112,11 @@ class LogicThread(threading.Thread):
         
         while True:
             # update direction
-            values['direction'] = modules.calc.direction_to_point(values['location'], target_locations[0])
+            values['direction'] = modules.calc.direction_to_point(data['location'], target_locations[0])
             values['absolute_wind_direction'] = data['wind_dir'] + data['heading']
             
-            time.sleep(values['eval_delay'])
-            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d" % data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'])
+            time.sleep(float(values['eval_delay']))
+            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction']))
             
             if self.sailable(target_locations[0]):
                 current_desired_heading = values['direction']
@@ -100,13 +124,13 @@ class LogicThread(threading.Thread):
                 
             else:
     
-                if preferred_tack == 0:  # if the target is not sailable and you haven't chosen a tack, choose one
+                if self.preferred_tack == 0:  # if the target is not sailable and you haven't chosen a tack, choose one
                     preferred_tack = (180 - data['heading']) / math.fabs(180 - data['heading'])
     
-                if preferred_tack == -1:  # if the boat is on a left-of-wind tack
+                if self.preferred_tack == -1:  # if the boat is on a left-of-wind tack
                     current_desired_heading = (data['heading'] - 45 + 360) % 360
                     
-                elif preferred_tack == 1: # if the boat is on a right-of-wind tack
+                elif self.preferred_tack == 1: # if the boat is on a right-of-wind tack
                     current_desired_heading = (data['heading']  + 45 + 360) % 360
                     
                 else:
@@ -124,9 +148,6 @@ class LogicThread(threading.Thread):
                 
 
 ## ----------------------------------------------------------
-
-def turn_rutter_to(angle):
-    pass
 
 class MotorThread(threading.Thread):
 

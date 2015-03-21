@@ -15,6 +15,7 @@ import modules.log
 import socket
 import sys
 import socketserver
+from modules.wind_sensor import WindSensor
 
 
 # Variables and constants
@@ -40,6 +41,7 @@ class DataThread(threading.Thread):
     """
 
     server_thread = None
+    wind_sensor = None
 
     def send_data(self, data):
 
@@ -57,6 +59,9 @@ class DataThread(threading.Thread):
         logging.getLogger().addHandler(modules.log.WebSocketLogger(self))
         
         logging.info('Starting the data thread!')
+
+        wind_sensor = WindSensor(name='Wind Sensor', kwargs={'data': data})
+        wind_sensor.start()
         
         # set up server
         server_thread = ServerThread(name='Server', kwargs={'port': values['port'], 'target_locations': target_locations, 'boundary_locations': boundary_locations})
@@ -109,6 +114,7 @@ class LogicThread(threading.Thread):
     
     def run(self):
         logging.info('Beginning autonomous navigation routines....')
+        logging.warn('The angle is: %d' % data['wind_dir'])
         
         while True:
             # update direction

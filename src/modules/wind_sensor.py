@@ -5,7 +5,8 @@ import logging
 try:
     import smbus
 except ImportError:
-    logging.critical("SMBUS is not configured on this device!")
+    # Do not log ImportError, as logging has not been configured yet
+    pass
 
 import threading
 

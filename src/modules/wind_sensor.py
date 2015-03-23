@@ -1,14 +1,36 @@
 #!/usr/bin/python
+
 import time
 import logging
 
-try:
-    import smbus
-except ImportError:
-    # Do not log ImportError, as logging has not been configured yet
-    pass
-
+import smbus
 import threading
+import socket
+import sys
+from thread import *
+import time
+import json
+import threading
+
+wind_sensor = None  # global wind_sensor variable
+angle = 0.0;
+
+# define the socket parameters
+HOST = ''
+PORT = 8807
+
+connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print 'Socket created'
+
+# bind socket to local host and port
+try:
+    connection.bind((HOST, PORT))
+except socket.error, msg:
+    print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' \
+        + msg[1]
+    sys.exit()
+
+print 'Socket bind complete'
 
 class WindSensor(threading.Thread):
 
@@ -16,7 +38,6 @@ class WindSensor(threading.Thread):
     analogs = [0x4000, 0x5000, 0x6000, 0x7000]
     normal = 0x0418
 
-    angle = 0.0;
 
     max = 1200.0
     min = 200.0
@@ -69,14 +90,52 @@ class WindSensor(threading.Thread):
             self.set_data_channel(analogs[0], bus)
 
             while True:
-                print('Read: %d as %d' % (readData(bus),
-                                          calculate_angle(readData(bus))))
-
-                self._kwargs['data']['angle'] = calculate_angle(readData(bus));
+                angle = calculate_angle(readData(bus));
                 time.sleep(0.1)
                 
         except NameError:
-            logging.critical('SMBUS is not correctly configured!')
+            print('SMBUS is not correctly configured!')
             return
 
-			
+            
+# create and start the wind_sensor thread
+wind_sensor = WindSensor()
+wind_sensor.start()
+
+# Start listening on socket
+connection.listen(10)
+print 'Socket now listening'
+
+# function for handling connections; will be used to create threads
+def clientthread(conn):
+
+    # infinite loop so that function do not terminate and thread do not end
+    while True:
+
+        # receive data from the client
+        data = conn.recv(1024)
+        if not data:
+            break
+        print 'Received %s from the server.' % data
+
+        if data == '0':
+            print 'Sending: %s' % angle
+            conn.sendall(angle)
+
+    # close the connection if the client if the client and server connection is interfered
+    conn.close()
+
+# main loop to keep the server process going
+while True:
+
+    # wait to accept a connection in a blocking call
+    (conn, addr) = connection.accept()
+    print 'Connected with ' + addr[0] + ':' + str(addr[1])
+
+    # start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
+
+    start_new_thread(clientthread, (conn, ))
+
+connection.close()
+
+            

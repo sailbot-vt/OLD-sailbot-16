@@ -4,18 +4,9 @@ echo '\033[36m\033[1mStarting SailBOT Build Script...\033[0m\033[39m'
 
 echo '\033[36m\033[1mUpdating Raspberry Pi...\033[0m\033[39m'
 sudo apt-get update
-echo '\033[36m\033[1mInstalling Python 3 Developer Packages...\033[0m\033[39m'
-sudo apt-get install build-essential python3-dev
-sudo apt-get update
-echo '\033[36m\033[1mInstalling GPS and GPSD Packages...\033[0m\033[39m'
-sudo apt-get install gpsd gpsd-clients python-gps
-sudo apt-get update
 
-echo '\033[36m\033[1mInstalling I2C Packages...\033[0m\033[39m'
-sudo apt-get install i2c-tools
-sudo apt-get update
-echo '\033[36m\033[1mInstalling Python Tools for IC2...\033[0m\033[39m'
-sudo apt-get install python-smbus
+echo '\033[36m\033[1mInstalling Python 3, GPSD, and I2C Dependencies...\033[0m\033[39m'
+sudo apt-get install build-essential python3-dev gpsd gpsd-clients python-gps i2c-tools python-smbus
 
 echo '\033[36m\033[1mRefreshing packages...\033[0m\033[39m'
 sudo apt-get update

@@ -6,7 +6,15 @@ from thread import *
 import time
 import json
 import threading
-from gps import *
+
+try:
+    from gps import *
+except ImportError:
+    print generate_error('GPS not configured properly!')
+    sys.exit(1)
+
+def generate_error(message):
+    print '\033[31m\033[1m%s\033[0m\033[39m' % message
 
 gpsd = None  # global GPSD variable
 gpsd_data = {}
@@ -16,17 +24,16 @@ HOST = ''
 PORT = 8907
 
 connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print 'Socket created'
 
 # bind socket to local host and port
 try:
     connection.bind((HOST, PORT))
 except socket.error, msg:
-    print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' \
-        + msg[1]
+    generate_error('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' \
+        + msg[1])
     sys.exit()
 
-print 'Socket bind complete'
+print 'GPS socket bind complete!'
 
 # GPSD polling class definitions
 class GPSPoller(threading.Thread):
@@ -64,11 +71,8 @@ def clientthread(conn):
         data = conn.recv(1024)
         if not data:
             break
-        print 'Received %s from the server.' % data
 
-        if data == '0':
-            print 'Sending: %s' % json.dumps(gpsd_data).encode('utf-8')
-            conn.sendall(json.dumps(gpsd_data).encode('utf-8'))
+        conn.sendall(json.dumps(gpsd_data).encode('utf-8'))
 
     # close the connection if the client if the client and server connection is interfered
     conn.close()

@@ -15,8 +15,6 @@ import modules.log
 import socket
 import sys
 import socketserver
-from modules.wind_sensor import WindSensor
-
 
 # Variables and constants
 
@@ -41,7 +39,6 @@ class DataThread(threading.Thread):
     """
 
     server_thread = None
-    wind_sensor = None
 
     def send_data(self, data):
 
@@ -59,52 +56,49 @@ class DataThread(threading.Thread):
         logging.getLogger().addHandler(modules.log.WebSocketLogger(self))
         
         logging.info('Starting the data thread!')
-
-        wind_sensor = WindSensor(name='Wind Sensor', kwargs={'data': data})
-        wind_sensor.start()
         
         # set up server
         server_thread = ServerThread(name='Server', kwargs={'port': values['port'], 'target_locations': target_locations, 'boundary_locations': boundary_locations})
         server_thread.start()
         
-        
-        HOST, PORT = "localhost", 8907
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        
+        # create the server processes 
         try:
-            sock.connect((HOST, PORT))
+            gps_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            gps_sock.connect(("localhost", 8907))
         except ConnectionRefusedError:
-            logging.critical('Connection to the GPS socket was refused!')
+            logging.critical("Could not connect to GPS socket")
+
+        try:
+            wind_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            wind_sock.connect(("localhost", 8894))
+        except ConnectionRefusedError:
+            logging.critical("Could not connect to wind sensor socket")
         
         while True:
             
+            # get and update the gps data
             try:
-                sock.send(str(0).encode('utf-8'))
-                received = sock.recv(1024)
-                
-                # parse the data from the server
-                parsed = json.loads(received.decode('utf-8'))
-                
-                # update the data object with known fields
-                data.update(parsed)
-                
-                # updates the location in the data object
-                data.location = Location(parsed.latitude, parsed.longitude)
-                
-                # send data to the server
-                server_thread.send_data(modules.utils.getJSON(data))
-                logging.debug('Data sent to the server %s'
-                             % json.dumps(json.loads(modules.utils.getJSON(data))))
-                
+                gps_sock.send(str(0).encode('utf-8'))
+                gps_parsed = json.loads(gps_sock.recv(1024).decode('utf-8'))
+                data.update(gps_parsed)
+                data.location = Location(gps_parsed.latitude, gps_parsed.longitude)
             except BrokenPipeError:
                 logging.error('The GPS socket is broken!')
-                
-            except ValueError:
-                logging.critical('The GPS data received from the server was malformed!')
 
+            # get and update the wind sensor data
+            try:
+                wind_sock.send(str(0).encode('utf-8'))
+                wind_parsed = json.loads(wind_sock.recv(1024).decode('utf-8'))
+                data.update(wind_parsed)
+            except BrokenPipeError:
+                logging.error('The wind sensor socket is broken!')
+
+            # send data to the server
+            server_thread.send_data(modules.utils.getJSON(data))
+            logging.debug('Data sent to the server %s' % json.dumps(json.loads(modules.utils.getJSON(data))))
+
+            # wait in the loop
             time.sleep(float(values['transmission_delay']))
-
-            
 
 
 ## ----------------------------------------------------------
@@ -190,7 +184,7 @@ if __name__ == '__main__':
         logging.info('Starting SailBOT!')
 
         data_thread = DataThread(name='Data').start()
-        motor_thread = MotorThread(name='Motor').start()
+        #motor_thread = MotorThread(name='Motor').start()
         time.sleep(10)
         logic_thread = LogicThread(name='Logic').start()
 

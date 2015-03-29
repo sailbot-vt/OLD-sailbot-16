@@ -7,14 +7,14 @@ import time
 import json
 import threading
 
+def generate_error(message):
+    print '\033[31m\033[1m%s\033[0m\033[39m' % message
+    
 try:
     from gps import *
 except ImportError:
-    print generate_error('GPS not configured properly!')
+    generate_error('GPS not configured properly!')
     sys.exit(1)
-
-def generate_error(message):
-    print '\033[31m\033[1m%s\033[0m\033[39m' % message
 
 gpsd = None  # global GPSD variable
 gpsd_data = {}

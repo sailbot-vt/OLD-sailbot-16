@@ -4,14 +4,14 @@ import time
 import logging
 import sys
 
+def generate_error(message):
+    print '\033[31m\033[1m%s\033[0m\033[39m' % message
+    
 try:
     import smbus
 except ImportError:
-    print generate_error('SMBUS not configured properly!')
+    generate_error('SMBUS not configured properly!')
     sys.exit(1)
-
-def generate_error(message):
-    print '\033[31m\033[1m%s\033[0m\033[39m' % message
 
 import threading
 import socket

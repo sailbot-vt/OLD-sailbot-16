@@ -84,7 +84,7 @@ def update_gpsd_data():
         gpsd_data.clear()
         gpsd_data.update({
             'latitude': gpsd.fix.latitude,
-            'longitude': gpsd.fix.latitude,
+            'longitude': gpsd.fix.longitude,
             'timestamp': gpsd.fix.time,
             'heading': gpsd.attitude.heading,
             'speed': gpsd.fix.speed,
@@ -96,7 +96,7 @@ def update_gpsd_data():
         # Uses standard GPS data for units that have unsupported features
         gpsd_data.update({
             'latitude': gpsd.fix.latitude,
-            'longitude': gpsd.fix.latitude,
+            'longitude': gpsd.fix.longitude,
             'timestamp': gpsd.fix.time,
             'speed': gpsd.fix.speed,
             })

@@ -24,6 +24,7 @@ HOST = ''
 PORT = 8907
 
 connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
 
 # bind socket to local host and port
 try:

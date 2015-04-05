@@ -57,7 +57,6 @@ gpsp.start()
 
 # Start listening on socket
 connection.listen(10)
-print 'Socket now listening'
 
 # function for handling connections; will be used to create threads
 def clientthread(conn):
@@ -79,7 +78,6 @@ def clientthread(conn):
     conn.close()
 
 def update_gpsd_data():
-    print 'Updating GPS data!'
     try:
         # tries to pull in all the critical GPS data
         gpsd_data.clear()
@@ -101,8 +99,6 @@ def update_gpsd_data():
             'timestamp': gpsd.fix.time,
             'speed': gpsd.fix.speed,
             })
-    
-    print gpsd_data
 
 # main loop to keep the server process going
 while True:

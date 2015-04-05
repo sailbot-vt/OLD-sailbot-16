@@ -40,6 +40,16 @@ class DataThread(threading.Thread):
 
     server_thread = None
 
+    def __init__(self, *args, **kwargs):
+        super(DataThread, self).__init__(*args, **kwargs)
+
+        global server_thread
+        server_thread = ServerThread(name='Server', kwargs={'port': values['port'], 'target_locations': target_locations, 'boundary_locations': boundary_locations})
+        server_thread.start()
+
+        # set up logging
+        logging.getLogger().addHandler(modules.log.WebSocketLogger(self))
+
     def send_data(self, data):
 
         # do not log any data here, doing so would create an infinite loop
@@ -50,16 +60,9 @@ class DataThread(threading.Thread):
             print('Could not send data because the socket is closed.')
 
     def run(self):
-        global server_thread
-
-        # set up logging
-        logging.getLogger().addHandler(modules.log.WebSocketLogger(self))
         
         logging.info('Starting the data thread!')
         
-        # set up server
-        server_thread = ServerThread(name='Server', kwargs={'port': values['port'], 'target_locations': target_locations, 'boundary_locations': boundary_locations})
-        server_thread.start()
         
         # create the server processes 
         try:

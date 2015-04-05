@@ -87,8 +87,7 @@ class ServerThread(threading.Thread):
             ws.close()
 
     def run(self):
-        global target_locations
-        global boundary_locations
+        global target_locations, boundary_locations
         
         logging.info('Starting server.')
         
@@ -106,8 +105,8 @@ class ServerThread(threading.Thread):
                          % self._kwargs['port'])
 
             # starts the main IO loop
-
             main_loop.start()
+            
         except OSError:
             logging.critical('The web server failed to bind to the port!')
         except Exception:

@@ -25,6 +25,7 @@ data = {'category': 'data', 'timestamp': 0, 'location': Location(0, 0),
 target_locations = []
 boundary_locations = []
 
+# Specifies the default values
 values = {'debug': False, 'port': 8888, 'log_name': 'sailbot.log',
           'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
           'direction': 0, 'absolute_wind_direction': 0}
@@ -53,7 +54,6 @@ class DataThread(threading.Thread):
     def send_data(self, data):
 
         # do not log any data here, doing so would create an infinite loop
-
         try:
             server_thread.send_data(data)
         except tornado.websocket.WebSocketClosedError:
@@ -64,13 +64,14 @@ class DataThread(threading.Thread):
         logging.info('Starting the data thread!')
         
         
-        # create the server processes 
+        # Connect to the GPS socket
         try:
             gps_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             gps_sock.connect(("localhost", 8907))
         except ConnectionRefusedError:
             logging.critical("Could not connect to GPS socket")
 
+        # Connect to the wind sensor socket
         try:
             wind_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             wind_sock.connect(("localhost", 8894))
@@ -79,7 +80,7 @@ class DataThread(threading.Thread):
         
         while True:
             
-            # get and update the gps data
+            # Query and update the gps data
             try:
                 gps_sock.send(str(0).encode('utf-8'))
                 gps_parsed = json.loads(gps_sock.recv(1024).decode('utf-8'))
@@ -88,7 +89,7 @@ class DataThread(threading.Thread):
             except BrokenPipeError:
                 logging.error('The GPS socket is broken!')
 
-            # get and update the wind sensor data
+            # Query and update the wind sensor data
             try:
                 wind_sock.send(str(0).encode('utf-8'))
                 wind_parsed = json.loads(wind_sock.recv(1024).decode('utf-8'))
@@ -96,11 +97,11 @@ class DataThread(threading.Thread):
             except BrokenPipeError:
                 logging.error('The wind sensor socket is broken!')
 
-            # send data to the server
+            # Send data to the server
             server_thread.send_data(modules.utils.getJSON(data))
             logging.debug('Data sent to the server %s' % json.dumps(json.loads(modules.utils.getJSON(data))))
 
-            # wait in the loop
+            # Wait in the loop
             time.sleep(float(values['transmission_delay']))
 
 
@@ -114,7 +115,7 @@ class LogicThread(threading.Thread):
         logging.warn('The angle is: %d' % data['wind_dir'])
         
         while True:
-            # update direction
+            # Update direction
             values['direction'] = modules.calc.direction_to_point(data['location'], target_locations[0])
             values['absolute_wind_direction'] = data['wind_dir'] + data['heading']
             
@@ -127,18 +128,19 @@ class LogicThread(threading.Thread):
                 
             else:
     
-                if self.preferred_tack == 0:  # if the target is not sailable and you haven't chosen a tack, choose one
+                if self.preferred_tack == 0:  # If the target is not sailable and you haven't chosen a tack, choose one
                     preferred_tack = (180 - data['heading']) / math.fabs(180 - data['heading'])
     
-                if self.preferred_tack == -1:  # if the boat is on a left-of-wind tack
+                if self.preferred_tack == -1:  # If the boat is on a left-of-wind tack
                     current_desired_heading = (data['heading'] - 45 + 360) % 360
                     
-                elif self.preferred_tack == 1: # if the boat is on a right-of-wind tack
+                elif self.preferred_tack == 1: # If the boat is on a right-of-wind tack
                     current_desired_heading = (data['heading']  + 45 + 360) % 360
                     
                 else:
                     logging.error('The preferred_tack was %d' % preferred_tack)
-                    
+            
+    # Checks to see if the target location is within a sailable region        
     def sailable(self, target_location):
         angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'] + 360) % 360
         

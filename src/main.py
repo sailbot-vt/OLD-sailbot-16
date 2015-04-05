@@ -143,33 +143,6 @@ class LogicThread(threading.Thread):
             return False
         
         return True
-        
-    
-                
-
-## ----------------------------------------------------------
-
-class MotorThread(threading.Thread):
-
-    def set(self, property, value):
-        try:
-            f = open('/sys/class/rpi-pwm/pwm0/' + property, 'w')
-            f.write(value)
-            f.close()
-        except:
-            logging.error('Error writing to: ' + property + ' value: ' + value)
-
-    def setServo(self, angle):
-        self.set('servo', str(angle))
-
-    def configureServos(self):
-        self.set('delayed', '0')
-        self.set('mode', 'servo')
-        self.set('servo_max', '180')
-        self.set('active', '1')
-
-    def run(self):
-        self.configureServos()
 
 
 ## ----------------------------------------------------------
@@ -184,7 +157,6 @@ if __name__ == '__main__':
         logging.info('Starting SailBOT!')
 
         data_thread = DataThread(name='Data').start()
-        #motor_thread = MotorThread(name='Motor').start()
         time.sleep(10)
         logic_thread = LogicThread(name='Logic').start()
 

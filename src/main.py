@@ -40,7 +40,7 @@ class DataThread(threading.Thread):
     """
 
     server_thread = None
-    servo_sock = None
+    rudder_sock = None
 
     def __init__(self, *args, **kwargs):
         super(DataThread, self).__init__(*args, **kwargs)
@@ -49,10 +49,10 @@ class DataThread(threading.Thread):
         server_thread = ServerThread(name='Server', kwargs={'port': values['port'], 'target_locations': target_locations, 'boundary_locations': boundary_locations})
         server_thread.start()
 
-        global servo_sock
+        global rudder_sock
         try:
-            servo_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            servo_sock.connect(("localhost", 9107))
+            rudder_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            rudder_sock.connect(("localhost", 9107))
         except ConnectionRefusedError:
             logging.critical("Could not connect to servo socket")
 
@@ -62,9 +62,9 @@ class DataThread(threading.Thread):
 
     def set_rudder_angle(self, angle):
         try:
-            gps_sock.send(str(angle).encode('utf-8'))
+            rudder_sock.send(str(angle).encode('utf-8'))
         except BrokenPipeError:
-            logging.critical("Could not connect to servo socket")
+            logging.error('The rudder socket is broken!')
 
     def send_data(self, data):
 

@@ -1,19 +1,23 @@
 #!/bin/bash
 
-echo '\033[36m\033[1mStarting SailBOT...\033[0m\033[39m'
+print_message() {
+	echo '\033[36m\033[1m'$1'\033[0m\033[39m'
+}
 
-echo '\033[36m\033[1mConfiguring GPSD...\033[0m\033[39m'
+print_message 'Starting SailBOT'
+
+print_message 'Configuring GPSD'
 sudo killall gpsd
 sudo gpsd /dev/ttyUSB0 -F /var/run/gpsd.sock
 
-echo '\033[36m\033[1mCreating GPSD TCP Socket...\033[0m\033[39m'
+print_message 'Creating GPSD TCP Socket...'
 sudo python "modules/pgps.py" &
 
-echo '\033[36m\033[1mCreating Wind Sensor TCP Socket...\033[0m\033[39m'
+print_message 'Creating Wind Sensor TCP Socket...'
 sudo python "modules/wind_sensor.py" &
 
-echo '\033[36m\033[1mCreating Rutter TCP Socket...\033[0m\033[39m'
+print_message 'Creating Rudder TCP Socket...'
 sudo python "modules/servo.py" 9107 18 1.5 1.2 &
 
-echo '\033[36m\033[1mLaunching main program...\033[0m\033[39m'
+print_message 'Launching main program...'
 sudo python3 main.py

@@ -100,4 +100,5 @@ class ServoController():
 
         connection.close()
 
+ServoController(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4]))
                 

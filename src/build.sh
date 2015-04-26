@@ -10,13 +10,13 @@ print_message 'Updating Raspberry Pi...'
 sudo apt-get update
 
 print_message 'Installing Python 3, GPSD, and I2C Dependencies...'
-sudo apt-get install build-essential python3-dev gpsd gpsd-clients python-gps i2c-tools python-smbus python-pip
+sudo apt-get install build-essential python3-dev gpsd gpsd-clients python-gps i2c-tools python-smbus python3-pip
 
 print_message 'Refreshing packages...'
 sudo apt-get update
 
 print_message 'Setting up Tornado Web Server...'
-sudo pip install tornado
+sudo pip-3.2 install tornado
 
 print_message 'Pulling project from repository...'
 cd ~/

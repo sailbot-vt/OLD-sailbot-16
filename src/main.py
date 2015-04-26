@@ -53,7 +53,8 @@ class DataThread(threading.Thread):
         try:
             rudder_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             rudder_sock.connect(("localhost", 9107))
-        except ConnectionRefusedError:
+        except socket.error:
+            # Connection refused error
             logging.critical("Could not connect to servo socket")
 
 
@@ -83,14 +84,15 @@ class DataThread(threading.Thread):
         try:
             gps_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             gps_sock.connect(("localhost", 8907))
-        except ConnectionRefusedError:
+        except socket.error:
+            # Connection refused error
             logging.critical("Could not connect to GPS socket")
 
         # Connect to the wind sensor socket
         try:
             wind_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             wind_sock.connect(("localhost", 8894))
-        except ConnectionRefusedError:
+        except socket.error:
             logging.critical("Could not connect to wind sensor socket")
         
         while True:
@@ -101,7 +103,8 @@ class DataThread(threading.Thread):
                 gps_parsed = json.loads(gps_sock.recv(1024).decode('utf-8'))
                 data.update(gps_parsed)
                 data.location = Location(gps_parsed.latitude, gps_parsed.longitude)
-            except BrokenPipeError:
+            except socket.error:
+                # Broken pipe error
                 logging.error('The GPS socket is broken!')
 
             # Query and update the wind sensor data
@@ -109,7 +112,8 @@ class DataThread(threading.Thread):
                 wind_sock.send(str(0).encode('utf-8'))
                 wind_parsed = json.loads(wind_sock.recv(1024).decode('utf-8'))
                 data.update(wind_parsed)
-            except BrokenPipeError:
+            except socket.error:
+                # Broken pipe error
                 logging.error('The wind sensor socket is broken!')
 
             # Send data to the server

@@ -8,11 +8,14 @@ import threading
 import os
 import logging
 import modules.utils
+from modules.control_thread import StoppableThread
 
 wss = []
 
 target_locations = []
 boundary_locations = []
+http_server = None
+main_loop = None
 
 class WSHandler(tornado.websocket.WebSocketHandler):
 
@@ -61,11 +64,9 @@ class Application(tornado.web.Application):
                     '../web')}
         tornado.web.Application.__init__(self, handlers, **settings)
 
-
 application = Application()
 
-
-class ServerThread(threading.Thread):
+class ServerThread(StoppableThread):
 
     """ Creates thread which runs the web socket server
     """
@@ -86,6 +87,14 @@ class ServerThread(threading.Thread):
         for ws in wss:
             ws.close()
 
+    def shutdown(self):
+        if self.stopped:
+            logging.warning('Stopping http server.')
+            self.close_sockets()
+            http_server.stop()
+            io_loop.stop()
+
+
     def run(self):
         global target_locations, boundary_locations
         
@@ -96,10 +105,12 @@ class ServerThread(threading.Thread):
         boundary_locations = self._kwargs['boundary_locations']
 
         try:
+            global http_server, io_loop
+
             http_server = tornado.httpserver.HTTPServer(application)
             http_server.listen(self._kwargs['port'])
 
-            main_loop = tornado.ioloop.IOLoop.instance()
+            main_loop = tornado.ioloop.IOLoop.instance().add_callback(self.shutdown)
 
             logging.info('The web server successfully bound to port %d'
                          % self._kwargs['port'])

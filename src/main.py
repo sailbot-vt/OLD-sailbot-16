@@ -15,6 +15,7 @@ import modules.log
 import socket
 import sys
 import socketserver
+from modules.control_thread import StoppableThread
 
 # Variables and constants
 
@@ -34,13 +35,13 @@ values = {'debug': False, 'port': 8888, 'log_name': 'sailbot.log',
 
 ## ----------------------------------------------------------
     
-class DataThread(threading.Thread):
+class DataThread(StoppableThread):
 
     """ Transmits the data object to the server thread
     """
 
     server_thread = None
-    rudder_sock = None
+    rudder_sock = None 
 
     def __init__(self, *args, **kwargs):
         super(DataThread, self).__init__(*args, **kwargs)
@@ -79,7 +80,6 @@ class DataThread(threading.Thread):
         
         logging.info('Starting the data thread!')
         
-        
         # Connect to the GPS socket
         try:
             gps_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -96,6 +96,11 @@ class DataThread(threading.Thread):
             logging.critical("Could not connect to wind sensor socket")
         
         while True:
+
+            if self.stopped():
+                # Stop the server thread
+                server_thread.stop()
+                break
             
             # Query and update the gps data
             try:
@@ -125,7 +130,7 @@ class DataThread(threading.Thread):
 
 
 ## ----------------------------------------------------------
-class LogicThread(threading.Thread):
+class LogicThread(StoppableThread):
 
     preferred_tack = 0 # -1 means left tack and 1 means right tack; 0 not on a tack
     
@@ -134,6 +139,10 @@ class LogicThread(threading.Thread):
         logging.warn('The angle is: %d' % data['wind_dir'])
         
         while True:
+
+            if self.stopped():
+                break
+
             # Update direction
             values['direction'] = modules.calc.direction_to_point(data['location'], target_locations[0])
             values['absolute_wind_direction'] = data['wind_dir'] + data['heading']
@@ -142,7 +151,7 @@ class LogicThread(threading.Thread):
             logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction']))
             
             if self.sailable(target_locations[0]):
-                current_desired_heading = values['direction']
+                values['current_desired_heading'] = values['direction']
                 preferred_tack = 0
                 
             else:
@@ -151,20 +160,20 @@ class LogicThread(threading.Thread):
                     preferred_tack = (180 - data['heading']) / math.fabs(180 - data['heading'])
     
                 if self.preferred_tack == -1:  # If the boat is on a left-of-wind tack
-                    current_desired_heading = (data['heading'] - 45 + 360) % 360
+                    values['current_desired_heading'] = (data['heading'] - 45 + 360) % 360
                     
                 elif self.preferred_tack == 1: # If the boat is on a right-of-wind tack
-                    current_desired_heading = (data['heading']  + 45 + 360) % 360
+                    values['current_desired_heading'] = (data['heading']  + 45 + 360) % 360
                     
                 else:
                     logging.error('The preferred_tack was %d' % preferred_tack)
 
-            self.turn_rudder();
+            self.turn_rudder()
 
     def turn_rudder(self):
 
         # Heading differential
-        a = current_desired_heading - data['heading']
+        a = values['current_desired_heading'] - data['heading']
         if (a > 180):
             a -= 360
 
@@ -176,9 +185,9 @@ class LogicThread(threading.Thread):
         if (a < (-1 * values['max_turn_rate_angle'])):
             a = -1 * values['max_turn_rate_angle']
 
-        rudder_angle = 90 + a * (values['max_rudder_angle'] / values['max_turn_rate_angle']);
+        rudder_angle = 90 + a * (values['max_rudder_angle'] / values['max_turn_rate_angle'])
 
-        data_thread.set_rudder_angle(rudder_angle)
+        self._kwargs['data_thread'].set_rudder_angle(rudder_angle)
             
     # Checks to see if the target location is within a sailable region        
     def sailable(self, target_location):
@@ -188,7 +197,6 @@ class LogicThread(threading.Thread):
             return False
         
         return True
-
 
 ## ----------------------------------------------------------
 
@@ -201,12 +209,27 @@ if __name__ == '__main__':
 
         logging.info('Starting SailBOT!')
 
-        data_thread = DataThread(name='Data').start()
-        time.sleep(10)
-        logic_thread = LogicThread(name='Logic').start()
+        data_thread = DataThread(name='Data')
+        logic_thread = LogicThread(name='Logic', kwargs={'data_thread': data_thread})
+
+        data_thread.start()
+        time.sleep(0)
+        logic_thread.start()
+
+        while True:
+            time.sleep(100)
 
     except KeyboardInterrupt:
         logging.critical('Program terminating!')
+        # Stop the threads
+        data_thread.stop()
+        logic_thread.stop()
 
+        # Join the threads into the main threads
+        data_thread.join()
+        logic_thread.join()
 
+        # Terminate the program
+        logging.critical('Program exited!')
+        sys.exit()
             

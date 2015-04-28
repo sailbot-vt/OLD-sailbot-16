@@ -90,15 +90,18 @@ class ServoController():
         # Main loop to keep the server process going
         while True:
 
-            # Wait to accept a connection in a blocking call
-            (conn, addr) = connection.accept()
-            print 'Connected with ' + addr[0] + ':' + str(addr[1])
+            try:
+                # Wait to accept a connection in a blocking call
+                (conn, addr) = connection.accept()
+                print 'Connected with ' + addr[0] + ':' + str(addr[1])
 
-            # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
+                # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
+                start_new_thread(clientthread, (conn, ))
 
-            start_new_thread(clientthread, (conn, ))
-
-        connection.close()
+            except KeyboardInterrupt, socket.error:
+                connection.shutdown(socket.SHUT_RDWR)
+                connection.close()
+                break
 
 ServoController(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4]))
                 

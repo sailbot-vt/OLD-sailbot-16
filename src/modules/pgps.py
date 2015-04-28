@@ -16,17 +16,17 @@ except ImportError:
     generate_error('GPS not configured properly!')
     sys.exit(1)
 
-gpsd = None  # global GPSD variable
+gpsd = None  # Global GPSD variable
 gpsd_data = {}
 
-# define the socket parameters
+# Define the socket parameters
 HOST = ''
 PORT = 8907
 
 connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
 
-# bind socket to local host and port
+# Bind socket to local host and port
 try:
     connection.bind((HOST, PORT))
 except socket.error, msg:
@@ -41,45 +41,46 @@ class GPSPoller(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
-        global gpsd  # bring it in scope
-        gpsd = gps(mode=WATCH_ENABLE)  # starting the stream of info
+        global gpsd  # Bring it in scope
+        gpsd = gps(mode=WATCH_ENABLE)  # Starting the stream of info
         self.current_value = None
-        self.running = True  # setting the thread running to true
+        self.running = True  # Setting the thread running to true
 
     def run(self):
         global gpsd
         while gpsp.running:
-            gpsd.next()  # this will continue to loop and grab each set of GPSD info to clear the buffer
+            gpsd.next()  # This will continue to loop and grab each set of GPSD info to clear the buffer
 
-# create and start the GPSD thread
+# Create and start the GPSD thread
 gpsp = GPSPoller()
+gpsp.daemon = True # Needed to make the thread shutdown correctly
 gpsp.start()
 
 # Start listening on socket
 connection.listen(10)
 
-# function for handling connections; will be used to create threads
+# Function for handling connections; will be used to create threads
 def clientthread(conn):
 
-    # infinite loop so that function do not terminate and thread do not end
+    # Infinite loop so that function do not terminate and thread do not end
     while True:
 
-        # updates the data dictionary        
+        # Updates the data dictionary        
         update_gpsd_data()
 
-        # receive data from the client
+        # Receive data from the client
         data = conn.recv(1024)
         if not data:
             break
 
         conn.sendall(json.dumps(gpsd_data).encode('utf-8'))
 
-    # close the connection if the client if the client and server connection is interfered
+    # Close the connection if the client if the client and server connection is interfered
     conn.close()
 
 def update_gpsd_data():
     try:
-        # tries to pull in all the critical GPS data
+        # Tries to pull in all the critical GPS data
         gpsd_data.clear()
         gpsd_data.update({
             'latitude': gpsd.fix.latitude,
@@ -100,17 +101,20 @@ def update_gpsd_data():
             'speed': gpsd.fix.speed,
             })
 
-# main loop to keep the server process going
+# Main loop to keep the server process going
 while True:
 
-    # wait to accept a connection in a blocking call
-    (conn, addr) = connection.accept()
-    print 'Connected with ' + addr[0] + ':' + str(addr[1])
+    try:
+        # Wait to accept a connection in a blocking call
+        (conn, addr) = connection.accept()
+        print 'Connected with ' + addr[0] + ':' + str(addr[1])
 
-    # start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
+        # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
+        start_new_thread(clientthread, (conn, ))
 
-    start_new_thread(clientthread, (conn, ))
-
-connection.close()
+    except KeyboardInterrupt, socket.error:
+        connection.shutdown(socket.SHUT_RDWR)
+        connection.close()
+        break
 
             

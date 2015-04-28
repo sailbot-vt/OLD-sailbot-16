@@ -89,7 +89,7 @@ class ServerThread(StoppableThread):
 
     def shutdown(self):
         if self.stopped:
-            logging.warning('Stopping http server.')
+            logging.warning('Stopping HTTP server.')
             self.close_sockets()
             http_server.stop()
             io_loop.stop()

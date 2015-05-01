@@ -65,7 +65,8 @@ class DataThread(StoppableThread):
     def set_rudder_angle(self, angle):
         try:
             rudder_sock.send(str(angle).encode('utf-8'))
-        except BrokenPipeError:
+        except socket.error:
+            # Broken Pipe Error
             logging.error('The rudder socket is broken!')
 
     def send_data(self, data):
@@ -102,13 +103,20 @@ class DataThread(StoppableThread):
                 server_thread.stop()
                 break
             
-            # Query and update the gps data
+            # Query and update the GPS data
             try:
                 gps_sock.send(str(0).encode('utf-8'))
                 gps_parsed = json.loads(gps_sock.recv(1024).decode('utf-8'))
-                data.update(gps_parsed)
+
+                # Strip the location from the raw data
+                j = gps_parsed
+                del j['latitude']
+                del j['longitude']
+                data.update(j)
+
+                # Add the location as an embeded data structure
                 data.location = Location(gps_parsed.latitude, gps_parsed.longitude)
-            except socket.error:
+            except (AttributeError, socket.error) as e:
                 # Broken pipe error
                 logging.error('The GPS socket is broken!')
 
@@ -116,7 +124,7 @@ class DataThread(StoppableThread):
             try:
                 wind_sock.send(str(0).encode('utf-8'))
                 wind_parsed = json.loads(wind_sock.recv(1024).decode('utf-8'))
-                data.update(wind_parsed)
+                data['wind_dir'] = wind_parsed
             except socket.error:
                 # Broken pipe error
                 logging.error('The wind sensor socket is broken!')

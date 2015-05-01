@@ -92,6 +92,8 @@ class WindSensor(threading.Thread):
     def run(self):
         global angle  # Bring the angle into scope
 
+        generate_error('Remember to calibrate the wind sensor before use!')
+
         try:
             bus = smbus.SMBus(0x01)
             self.setup(1500, bus)

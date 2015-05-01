@@ -87,14 +87,6 @@ class ServerThread(StoppableThread):
         for ws in wss:
             ws.close()
 
-    def shutdown(self):
-        if self.stopped:
-            logging.warning('Stopping HTTP server.')
-            self.close_sockets()
-            http_server.stop()
-            io_loop.stop()
-
-
     def run(self):
         global target_locations, boundary_locations
         
@@ -105,12 +97,22 @@ class ServerThread(StoppableThread):
         boundary_locations = self._kwargs['boundary_locations']
 
         try:
-            global http_server, io_loop
+            global http_server, main_loop
 
             http_server = tornado.httpserver.HTTPServer(application)
             http_server.listen(self._kwargs['port'])
 
-            main_loop = tornado.ioloop.IOLoop.instance().add_callback(self.shutdown)
+            main_loop = tornado.ioloop.IOLoop.instance()
+
+            def shutdown():
+                if self.stopped():
+                    logging.warning('Stopping HTTP server.')
+                    self.close_sockets()
+                    http_server.stop()
+                    main_loop.stop()
+
+            scheduler = tornado.ioloop.PeriodicCallback(shutdown, 1000, io_loop = main_loop)
+            scheduler.start()
 
             logging.info('The web server successfully bound to port %d'
                          % self._kwargs['port'])
@@ -120,7 +122,7 @@ class ServerThread(StoppableThread):
             
         except OSError:
             logging.critical('The web server failed to bind to the port!')
-        except Exception:
-            logging.critical('The web server failed to start!')
+
+
 
 

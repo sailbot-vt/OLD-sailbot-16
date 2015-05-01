@@ -21,7 +21,6 @@ class ServoController():
     class Servo():
 
         def blink(self, angle, pin, scale_factor, zero_point, ticks):
-            GPIO.setup(pin, GPIO.OUT)
             a = (((angle)/180.0) * scale_factor + zero_point)/1000.0
 
             for i in range(0, ticks):
@@ -32,8 +31,6 @@ class ServoController():
                 GPIO.output(pin, False)
                 # Time between pulses
                 time.sleep(0.015)
-
-            GPIO.cleanup()
 
     def __init__(self, port, pin, scale_factor, zero_point):
         self.port = port
@@ -99,6 +96,7 @@ class ServoController():
                 start_new_thread(clientthread, (conn, ))
 
             except KeyboardInterrupt, socket.error:
+                GPIO.cleanup()
                 connection.shutdown(socket.SHUT_RDWR)
                 connection.close()
                 break

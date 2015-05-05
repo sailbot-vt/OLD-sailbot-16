@@ -10,25 +10,26 @@ The majority of code for SailBOT is written in Python due to vast library suppor
 
 The goal of the project is to build upon the SailBOT foundation laid in previous years. It should be extensible, modular, verbose, and minimalistic.
 
-Dependencies & Installation
-----------------------------------
-**Dependencies**
-The boat uses the [Tornado web server API](http://www.tornadoweb.org/) to create a web server. This can either be installed on the device to deploy the code by running:
+## Installation and Setup
 
-    pip install tornado
+To configure the Raspberry Pi, simply clone this repository and launch the build script from the terminal:
 
-or manually downloading the API, extracting it, and running `setup.py`:
+    sh build.sh
 
-    tar xvzf tornado.tar.gz
-    cd tornado
-    python setup.py build
-    sudo python setup.py install
+SailBOT requires the following dependencies and packages:
 
-**Deployment**
-Download the most recent build, navigate to the host directory, copy the build over, and launch the main file `main.py`:
+ 1. Raspberry Pi running the latest version of [Raspbian](http://downloads.raspberrypi.org/raspbian_latest)
+ 2. [Tornado](http://www.tornadoweb.org/en/stable/) web server
+ 3. I2C and SMBus
+ 5. [GPSD](http://www.catb.org/gpsd/)
 
-    scp ~/Desktop/build.tar.gz pi@raspberrypi:~/Desktop/build.tar.gz
-    cd ~/Desktop
-    tar xvzf build.tar.gz
-    sudo python build/main.py
+> Note: running the build script will modify the Raspberry Pi's system files to support I2C and lower-level hardware
+
+## Deployment
+
+To run SailBOT, simply start `launch.sh`. This script will start various separate processes including the main program and GPDS, wind sensor, and servo controllers over various TCP sockets. 
+
+Pull requests and feature suggestions are welcome.
+
+
 

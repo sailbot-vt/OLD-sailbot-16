@@ -10,7 +10,7 @@ def generate_error(message):
 try:
     import smbus
 except ImportError:
-    generate_error('SMBUS not configured properly!')
+    generate_error('[Wind Sensor Socket]: SMBUS not configured properly!')
     sys.exit(1)
 
 import threading
@@ -36,11 +36,11 @@ connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 try:
     connection.bind((HOST, PORT))
 except socket.error, msg:
-    generate_error('Bind failed. Error Code: ' + str(msg[0]) + ' Message ' \
+    generate_error('[Wind Sensor Socket]: Bind failed. Error Code: ' + str(msg[0]) + ' Message ' \
         + msg[1])
     sys.exit()
 
-print 'Wind sensor socket bind complete'
+print '[Wind Sensor Socket]: Socket bind complete!'
 
 
 class WindSensor(threading.Thread):
@@ -92,7 +92,7 @@ class WindSensor(threading.Thread):
     def run(self):
         global angle  # Bring the angle into scope
 
-        generate_error('Remember to calibrate the wind sensor before use!')
+        generate_error('[Wind Sensor Socket]: Remember to calibrate the wind sensor before use!')
 
         try:
             bus = smbus.SMBus(0x01)
@@ -103,7 +103,7 @@ class WindSensor(threading.Thread):
                 angle = self.calculate_angle(self.read_data(bus))
                 time.sleep(0.1)
         except IOError:
-            generate_error('IO Error: device cannot be read, check your wiring or run as root')
+            generate_error('[Wind Sensor Socket]: IO Error: device cannot be read, check your wiring or run as root')
 
 # Create and start the wind_sensor thread
 wind_sensor = WindSensor()
@@ -138,7 +138,7 @@ while True:
     try:
         # Wait to accept a connection in a blocking call
         (conn, addr) = connection.accept()
-        print 'Connected with ' + addr[0] + ':' + str(addr[1])
+        print '[Wind Sensor Socket]: Connected with ' + addr[0] + ':' + str(addr[1])
 
         # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
         start_new_thread(clientthread, (conn, ))

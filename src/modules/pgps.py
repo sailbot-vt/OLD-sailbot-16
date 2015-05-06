@@ -37,7 +37,7 @@ except socket.error, msg:
         + msg[1])
     sys.exit()
 
-print '[GPS Socket]: GPS socket bind complete!'
+print '[GPS Socket]: Socket bind complete!'
 
 # GPSD polling class definitions
 class GPSPoller(threading.Thread):

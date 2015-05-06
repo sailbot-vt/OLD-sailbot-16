@@ -31,8 +31,6 @@ values = {'debug': False, 'port': 8888, 'log_name': 'sailbot.log',
           'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
           'direction': 0, 'absolute_wind_direction': 0, 'max_turn_rate_angle': 70, 'max_rudder_angle': 30}
 
-
-
 ## ----------------------------------------------------------
     
 class DataThread(StoppableThread):
@@ -108,18 +106,16 @@ class DataThread(StoppableThread):
                 gps_sock.send(str(0).encode('utf-8'))
                 gps_parsed = json.loads(gps_sock.recv(1024).decode('utf-8'))
 
-                # Strip the location from the raw data
-                j = gps_parsed
-                del j['latitude']
-                del j['longitude']
-                data.update(j)
+                logging.warn(gps_parsed)
+
+                # Update the data object
+                data.update(gps_parsed)
 
                 # Add the location as an embeded data structure
                 data.location = Location(gps_parsed.latitude, gps_parsed.longitude)
             except (AttributeError, socket.error) as e:
-                # Broken pipe error
-                logging.error('The GPS socket is broken!')
-
+                logging.error('The GPS socket is broken or sent malformed data!')
+ 
             # Query and update the wind sensor data
             try:
                 wind_sock.send(str(0).encode('utf-8'))
@@ -195,6 +191,7 @@ class LogicThread(StoppableThread):
 
         rudder_angle = 90 + a * (values['max_rudder_angle'] / values['max_turn_rate_angle'])
 
+        logging.debug('Set the rudder angle to: %f' % rudder_angle)
         self._kwargs['data_thread'].set_rudder_angle(rudder_angle)
             
     # Checks to see if the target location is within a sailable region        

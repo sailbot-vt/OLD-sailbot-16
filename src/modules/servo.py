@@ -13,7 +13,7 @@ def generate_error(message):
 try:
     import RPi.GPIO as GPIO
 except ImportError:
-    generate_error('GPIO not configured properly!')
+    generate_error('[Servo Socket]: GPIO not configured properly!')
     sys.exit(1)
 
 class ServoController():
@@ -53,11 +53,11 @@ class ServoController():
         try:
             connection.bind((HOST, PORT))
         except socket.error, msg:
-            generate_error('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' \
+            generate_error('[Servo Socket]: Bind failed. Error Code: ' + str(msg[0]) + ' Message ' \
                 + msg[1])
             sys.exit()
 
-        print 'Servo socket bind complete!'
+        print '[Servo Socket]: Socket bind complete!'
 
         # Create a pointer to the servo class
         servo = self.Servo()
@@ -79,7 +79,7 @@ class ServoController():
                 try:
                     servo.blink(float(data), self.pin, self.scale_factor, self.zero_point, 100)
                 except ValueError:
-                   generate_error("Recieved extraneous angle value!")
+                   generate_error('[Servo Socket]: Recieved extraneous angle value!')
 
             # Close the connection if the client if the client and server connection is interfered
             conn.close()
@@ -90,7 +90,7 @@ class ServoController():
             try:
                 # Wait to accept a connection in a blocking call
                 (conn, addr) = connection.accept()
-                print 'Connected with ' + addr[0] + ':' + str(addr[1])
+                print '[Servo Socket]: Connected with ' + addr[0] + ':' + str(addr[1])
 
                 # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
                 start_new_thread(clientthread, (conn, ))

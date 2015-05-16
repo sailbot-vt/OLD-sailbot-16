@@ -1,7 +1,5 @@
 #!/usr/bin/python
-
 import json
-
 
 class Location(object):
 

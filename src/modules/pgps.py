@@ -1,11 +1,6 @@
 #!/usr/bin/python
-
-import socket
-import sys
+import socket, sys, time, json, threading
 from thread import *
-import time
-import json
-import threading
 
 def generate_error(message):
     print '\033[31m\033[1m%s\033[0m\033[39m' % message

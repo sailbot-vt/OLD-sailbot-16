@@ -1,5 +1,5 @@
-import logging
-import modules.utils
+#!/usr/bin/python
+import logging, modules.utils
 
 class WebSocketLogger(logging.Handler):
 

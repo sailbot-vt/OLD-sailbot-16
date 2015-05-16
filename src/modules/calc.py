@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import math
 
 """ The file contains help methods to logic functions.

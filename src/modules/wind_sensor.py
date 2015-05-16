@@ -1,8 +1,5 @@
 #!/usr/bin/python
-
-import time
-import logging
-import sys
+import time, logging, sys
 
 def generate_error(message):
     print '\033[31m\033[1m%s\033[0m\033[39m' % message

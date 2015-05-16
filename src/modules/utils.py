@@ -1,8 +1,6 @@
-import json
-import modules.calc
+#!/usr/bin/python
+import json, logging, configparser, modules.calc
 from modules.location import Location
-import logging
-import configparser
 from datetime import datetime
 
 def getJSON(obj):

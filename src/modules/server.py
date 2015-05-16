@@ -1,13 +1,6 @@
 #!/usr/bin/python
-
-import tornado.httpserver
-import tornado.websocket
-import tornado.ioloop
-import tornado.web
-import threading
-import os
-import logging
-import modules.utils
+import tornado.httpserver, tornado.websocket, tornado.ioloop, tornado.web
+import threading, os, logging, modules.utils
 from modules.control_thread import StoppableThread
 
 wss = []

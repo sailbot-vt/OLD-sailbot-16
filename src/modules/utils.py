@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import json, logging, configparser, modules.calc
+import json, logging, configparser, modules.calc, time, os
 from modules.location import Location
 from datetime import datetime
 
@@ -34,7 +34,7 @@ def setup_locations(target_locations, boundary_locations):
 
 def setup_config(values):
 
-    # logging in this method must stay as print statements because the logger
+    # Logging in this method must stay as print statements because the logger
     # has not been defined yet
 
     try:
@@ -43,22 +43,23 @@ def setup_config(values):
 
         values['debug'] = config.getboolean('DEFAULT', 'debug')
         values['port'] = config.getint('DEFAULT', 'port')
-        values['log_name'] = config.get('DEFAULT', 'log_name')
         values['transmission_delay'] = config.get('DEFAULT', 'transmission_delay')
         values['eval_delay'] = config.get('DEFAULT', 'eval_delay')
 
-        modules.calc.point_proximity_radius = config.get('LOGIC',
-                'point_proximity_radius')
+        modules.calc.point_proximity_radius = config.get('LOGIC', 'point_proximity_radius')
 
         print('Configuration file successfully loaded.')
+
     except configparser.NoOptionError:
         print('The locations configuration file could not be found or is malformed!')
 
     if values['debug']:
-        log_format = \
-            '[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s'
+        log_format = '[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s'
 
-        logging.basicConfig(filename=values['log_name'], format=log_format,
+        log_path = r'logs/' 
+        if not os.path.exists(log_path): os.makedirs(log_path)
+
+        logging.basicConfig(filename='logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '.log', format=log_format,
                             datefmt='%H:%M:%S', level=logging.DEBUG)
 
         root = logging.StreamHandler()
@@ -66,6 +67,4 @@ def setup_config(values):
 
         logging.getLogger().addHandler(root)
 
-        logging.info('-------------------------------')
-        logging.info('Log started on: %s'
-                     % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        logging.info('Log started on: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

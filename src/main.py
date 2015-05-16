@@ -14,8 +14,7 @@ target_locations = []
 boundary_locations = []
 
 # Specifies the default values
-values = {'debug': False, 'port': 8888, 'log_name': 'sailbot.log',
-          'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
+values = {'debug': False, 'port': 8888, 'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
           'direction': 0, 'absolute_wind_direction': 0, 'max_turn_rate_angle': 70, 'max_rudder_angle': 30}
 
 ## ----------------------------------------------------------
@@ -44,7 +43,7 @@ class DataThread(StoppableThread):
             logging.critical("Could not connect to servo socket")
 
 
-        # set up logging
+        # Set up logging to the web server console
         logging.getLogger().addHandler(modules.log.WebSocketLogger(self))
 
     def set_rudder_angle(self, angle):
@@ -196,6 +195,7 @@ if __name__ == '__main__':
     try:
         threading.current_thread().setName('Main')
 
+        # Sets up the program configuration
         modules.utils.setup_config(values)
         modules.utils.setup_locations(target_locations, boundary_locations)
 

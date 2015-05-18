@@ -15,6 +15,7 @@ function initialize() {
 		scaleControl : true,
 		streetViewControl : false,
 		overviewMapControl : false,
+		mapTypeId: google.maps.MapTypeId.TERRAIN,
 
 		styles : [ {
 			"featureType" : "water",

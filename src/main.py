@@ -14,7 +14,7 @@ target_locations = []
 boundary_locations = []
 
 # Specifies the default values
-values = {'debug': False, 'port': 8888, 'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
+values = {'debug': False, 'port': 80, 'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
           'direction': 0, 'absolute_wind_direction': 0, 'max_turn_rate_angle': 70, 'max_rudder_angle': 30}
 
 ## ----------------------------------------------------------

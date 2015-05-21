@@ -12,6 +12,7 @@ data = {'category': 'data', 'timestamp': 0, 'location': Location(0, 0),
 
 target_locations = []
 boundary_locations = []
+location_pointer = 0
 
 # Specifies the default values
 values = {'debug': False, 'port': 80, 'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
@@ -158,6 +159,7 @@ class LogicThread(StoppableThread):
                     logging.error('The preferred_tack was %d' % self.preferred_tack)
 
             self.turn_rudder()
+            self.check_locations()
 
     def turn_rudder(self):
 
@@ -187,6 +189,14 @@ class LogicThread(StoppableThread):
             return False
         
         return True
+
+    def check_locations(self):
+        global location_pointer
+        logging.debug('Trying to sail to %s' % target_locations[location_pointer])
+
+        if modules.calc.point_proximity(data['location'], target_locations[location_pointer]):
+            logging.debug('Location %s has been reached! Now traveling to %s!' % (target_locations[location_pointer], target_locations[location_pointer + 1]))
+            location_pointer += 1
 
 ## ----------------------------------------------------------
 

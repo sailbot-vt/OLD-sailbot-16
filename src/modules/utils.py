@@ -46,7 +46,7 @@ def setup_config(values):
         values['transmission_delay'] = config.get('DEFAULT', 'transmission_delay')
         values['eval_delay'] = config.get('DEFAULT', 'eval_delay')
 
-        modules.calc.point_proximity_radius = config.get('LOGIC', 'point_proximity_radius')
+        modules.calc.point_proximity_radius = float(config.get('LOGIC', 'point_proximity_radius'))
 
         print('Configuration file successfully loaded.')
 

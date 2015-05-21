@@ -6,10 +6,6 @@ print_message() {
 
 print_message 'Starting SailBOT'
 
-print_message 'Configuring GPSD'
-sudo killall gpsd
-sudo gpsd /dev/ttyUSB0 -F /var/run/gpsd.sock
-
 print_message 'Creating GPSD TCP Socket...'
 sudo python "modules/pgps.py" &
 

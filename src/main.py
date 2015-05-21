@@ -92,13 +92,12 @@ class DataThread(StoppableThread):
                 gps_sock.send(str(0).encode('utf-8'))
                 gps_parsed = json.loads(gps_sock.recv(1024).decode('utf-8'))
 
-                logging.warn(gps_parsed)
-
                 # Update the data object
                 data.update(gps_parsed)
 
                 # Add the location as an embeded data structure
-                data.location = Location(gps_parsed.latitude, gps_parsed.longitude)
+                data['location'] = Location(gps_parsed['latitude'], gps_parsed['longitude'])
+                
             except (AttributeError, socket.error) as e:
                 logging.error('The GPS socket is broken or sent malformed data!')
  

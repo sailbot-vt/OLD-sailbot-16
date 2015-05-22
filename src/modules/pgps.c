@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <unistd.h>
 
@@ -18,11 +19,11 @@ static time_t status_timer;
 static struct fixsource_t source;
 static struct gps_data_t gpsdata;
 
-char json[1024];
+char json[256];
 
 // Method prototypes
 void build_json(void);
-void write_element(char*, float, char*);
+void write_element(char*, float, char*, bool);
 void get_data(void);
 
 // GPS variables
@@ -90,7 +91,8 @@ int main(int argc, char *argv[]) {
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (sockfd < 0) {
-        error("[GPS Socket]: Error: Cannot open socket");
+        error("[GPS Socket]: Error: Cannot open socket\n");
+        exit(1);
     }
 
     bzero((char*) & server_address, sizeof(server_address));
@@ -103,7 +105,8 @@ int main(int argc, char *argv[]) {
     // Bind to the socket
     if (bind(sockfd, (struct sockaddr*) & server_address,
             sizeof(server_address)) < 0) {
-        error("[GPS Socket]: Error: Failed to bind to socket");
+        error("[GPS Socket]: Error: Failed to bind to socket\n");
+        exit(1);
     }
 
     listen(sockfd, 5);
@@ -113,7 +116,7 @@ int main(int argc, char *argv[]) {
     clientsockfd = accept(sockfd, (struct sockaddr*) & client_address, &client);
 
     if (clientsockfd < 0) {
-        error("[GPS Socket]: Error: Problem accepting request");
+        error("[GPS Socket]: Error: Problem accepting request\n");
     }
 
     // Enter and infinite connection with the client
@@ -123,20 +126,25 @@ int main(int argc, char *argv[]) {
         // Socket read functions
         n = read(clientsockfd, buffer, 255);
 
+        if(n == 0) {
+            printf("[GPS Socket]: Client disconnected\n");
+            break;
+        }
+
         if (n < 0) {
-            error("[GPS Socket]: Error: Cannot read from socket");
+            error("[GPS Socket]: Error: Cannot read from socket\n");
         }
 
         get_data();
         build_json();
 
         // Socket write functions
-        printf("Sent: %s\n", json);
-        n = write(clientsockfd, json, 0);
+        printf("[GPS Socket]: Sent: %s\n", json);
+        n = write(clientsockfd, json, 256);
 
 
         if (n < 0) {
-            error("[GPS Socket]: Error: Cannot write to socket");
+            error("[GPS Socket]: Error: Cannot write to socket\n");
         }
     }
 
@@ -148,23 +156,26 @@ int main(int argc, char *argv[]) {
 }
 
 void build_json(void) {
-    strcpy(json, "{ ");
+    strcpy(json, "{");
 
-    write_element("time", unix_time, "%d");
-    write_element("latitude", latitude, "%0.7f");
-    write_element("longitude", longitude, "%0.7f");
-    write_element("heading", heading, "%f");
-    write_element("roll", roll, "%0.3f");
-    write_element("pitch", pitch, "%0.3f");
-    write_element("yaw", yaw, "%0.3f");
+    write_element("time", unix_time, "%d", true);
+    write_element("latitude", latitude, "%0.7f", true);
+    write_element("longitude", longitude, "%0.7f", true);
+    write_element("heading", heading, "%f", true);
+    write_element("roll", roll, "%0.3f", true);
+    write_element("pitch", pitch, "%0.3f", true);
+    write_element("yaw", yaw, "%0.3f", false);
 
-    strcpy(json + strlen(json), " }");
+    strcpy(json + strlen(json), "}");
 }
 
-void write_element(char* property, float value, char* format) {
+void write_element(char* property, float value, char* format, bool last) {
     sprintf(json + strlen(json), "\"%s\":", property);
     sprintf(json + strlen(json), format, value);
-    strcpy(json + strlen(json), ", ");
+
+    if(last) {
+        strcpy(json + strlen(json), ", ");
+    }
 }
 
 

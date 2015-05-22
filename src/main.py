@@ -99,7 +99,7 @@ class DataThread(StoppableThread):
                 # Add the location as an embeded data structure
                 data['location'] = Location(gps_parsed['latitude'], gps_parsed['longitude'])
                 
-            except (AttributeError, socket.error) as e:
+            except (AttributeError, ValueError, socket.error) as e:
                 logging.error('The GPS socket is broken or sent malformed data!')
  
             # Query and update the wind sensor data
@@ -107,7 +107,7 @@ class DataThread(StoppableThread):
                 wind_sock.send(str(0).encode('utf-8'))
                 wind_parsed = json.loads(wind_sock.recv(1024).decode('utf-8'))
                 data['wind_dir'] = wind_parsed
-            except socket.error:
+            except (ValueError, socket.error) as e:
                 # Broken pipe error
                 logging.error('The wind sensor socket is broken!')
 
@@ -160,6 +160,7 @@ class LogicThread(StoppableThread):
 
             self.turn_rudder()
             self.check_locations()
+            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d, Sailable: %r\n" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.preferred_tack, self.sailable(target_locations[location_pointer])))
 
     def turn_rudder(self):
 

@@ -19,7 +19,7 @@ static time_t status_timer;
 static struct fixsource_t source;
 static struct gps_data_t gpsdata;
 
-char json[256];
+char json[128];
 
 // Method prototypes
 void build_json(void);

@@ -12,9 +12,9 @@ The goal of the project is to build upon the SailBOT foundation laid in previous
 
 ## Installation and Setup
 
-To configure the Raspberry Pi, simply clone this repository and launch the build script from the terminal:
+To configure the Raspberry Pi, simply clone this repository and launch the setup script from the terminal:
 
-    sh build.sh
+    sh setup.sh
 
 SailBOT requires the following dependencies and packages:
 
@@ -23,7 +23,7 @@ SailBOT requires the following dependencies and packages:
  3. I2C and SMBus
  5. [GPSD](http://www.catb.org/gpsd/)
 
-> Note: running the build script will modify the Raspberry Pi's system files to support I2C and lower-level hardware
+> Note: running the setup script will modify the Raspberry Pi's system files to support I2C and lower-level hardware
 
 ## Deployment
 

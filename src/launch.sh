@@ -7,7 +7,7 @@ print_message() {
 print_message 'Starting SailBOT'
 
 print_message 'Creating GPSD TCP Socket...'
-sudo python "modules/pgps.py" &
+./modules/pgps 8907 &
 
 print_message 'Creating Wind Sensor TCP Socket...'
 sudo python "modules/wind_sensor.py" &

@@ -26,7 +26,8 @@ class DataThread(StoppableThread):
     """
 
     server_thread = None
-    rudder_sock = None 
+    rudder_sock = None
+    winch_sock = None
 
     def __init__(self, *args, **kwargs):
         super(DataThread, self).__init__(*args, **kwargs)
@@ -43,6 +44,14 @@ class DataThread(StoppableThread):
             # Connection refused error
             logging.critical("Could not connect to servo socket")
 
+        global winch_sock
+        try:
+            winch_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            winch_sock.connect(("localhost", 9108))
+        except socket.error:
+            # Connection refused error
+            logging.critical("Could not connect to servo socket")
+
 
         # Set up logging to the web server console
         logging.getLogger().addHandler(modules.log.WebSocketLogger(self))
@@ -53,6 +62,13 @@ class DataThread(StoppableThread):
         except socket.error:
             # Broken Pipe Error
             logging.error('The rudder socket is broken!')
+
+    def set_winch_angle(self, angle):
+        try:
+            winch_sock.send(str(angle).encode('utf-8'))
+        except socket.error:
+            # Broken Pipe Error
+            logging.error('The winch socket is broken!')
 
     def send_data(self, data):
 
@@ -98,6 +114,8 @@ class DataThread(StoppableThread):
 
                 # Add the location as an embeded data structure
                 data['location'] = Location(gps_parsed['latitude'], gps_parsed['longitude'])
+
+                data['heading'] = 180
                 
             except (AttributeError, ValueError, socket.error) as e:
                 logging.error('The GPS socket is broken or sent malformed data!')
@@ -123,7 +141,8 @@ class DataThread(StoppableThread):
 class LogicThread(StoppableThread):
 
     preferred_tack = 0 # -1 means left tack and 1 means right tack; 0 not on a tack
-    
+    preferred_gybe = 0
+
     def run(self):
         logging.info('Beginning autonomous navigation routines....')
         logging.warn('The angle is: %d' % data['wind_dir'])
@@ -158,6 +177,7 @@ class LogicThread(StoppableThread):
                     logging.error('The preferred_tack was %d' % self.preferred_tack)
 
             self.turn_rudder()
+            self.turn_winch()
             self.check_locations()
             logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d, Sailable: %r\n" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.preferred_tack, self.sailable(target_locations[location_pointer])))
 
@@ -180,6 +200,11 @@ class LogicThread(StoppableThread):
 
         logging.debug('Set the rudder angle to: %f' % rudder_angle)
         self._kwargs['data_thread'].set_rudder_angle(rudder_angle)
+
+
+    def turn_winch(self):
+
+        self._kwargs['data_thread'].set_winch_angle(winch_angle)
             
     # Checks to see if the target location is within a sailable region        
     def sailable(self, target_location):

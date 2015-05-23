@@ -135,12 +135,11 @@ class LogicThread(StoppableThread):
 
             # Update direction
             values['direction'] = modules.calc.direction_to_point(data['location'], target_locations[0])
-            values['absolute_wind_direction'] = data['wind_dir'] + data['heading']
+            values['absolute_wind_direction'] = (data['wind_dir'] + data['heading']) % 360
             
             time.sleep(float(values['eval_delay']))
-            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.preferred_tack))
             
-            if self.sailable(target_locations[0]):
+            if self.sailable(target_locations[location_pointer]):
                 values['current_desired_heading'] = values['direction']
                 self.preferred_tack = 0
                 
@@ -184,7 +183,7 @@ class LogicThread(StoppableThread):
             
     # Checks to see if the target location is within a sailable region        
     def sailable(self, target_location):
-        angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'] + 360) % 360
+        angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'])
         
         if(math.fabs(angle_of_target_off_the_wind) < 45):
             return False

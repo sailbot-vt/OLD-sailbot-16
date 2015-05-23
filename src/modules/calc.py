@@ -16,7 +16,7 @@ def direction_to_point(current_point, target_point):
     y = math.sin(d) * math.cos(b)
     x = math.cos(a) * math.sin(b) - math.sin(a) * math.cos(b) * math.cos(d)
     
-    return (math.degrees(math.atan2(y, x)) + 360) % 360
+    return 360 - ((math.degrees(math.atan2(y, x)) + 360) % 360)
 
 def get_heading_angle(heading, current_point, target_point):
     angle = direction_to_point(current_point, target_point)

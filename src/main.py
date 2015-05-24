@@ -138,14 +138,15 @@ class DataThread(StoppableThread):
 
 
 ## ----------------------------------------------------------
+
 class LogicThread(StoppableThread):
 
     preferred_tack = 0 # -1 means left tack and 1 means right tack; 0 not on a tack
-    preferred_gybe = 0
-
+    preferred_gybe = 0 # -1 means left-of-wind gybe and 1 means right-of-wind gybe; 0 not on a gybe
+    
     def run(self):
-        logging.info('Beginning autonomous navigation routines....')
-        logging.warn('The angle is: %d' % data['wind_dir'])
+        logging.info("Beginning autonomous navigation routines....")
+        logging.warn("The angle is: %d" % data['wind_dir'])
         
         while True:
 
@@ -154,17 +155,21 @@ class LogicThread(StoppableThread):
 
             # Update direction
             values['direction'] = modules.calc.direction_to_point(data['location'], target_locations[0])
-            values['absolute_wind_direction'] = (data['wind_dir'] + data['heading']) % 360
+            values['absolute_wind_direction'] = data['wind_dir'] + data['heading']
             
             time.sleep(float(values['eval_delay']))
-            
+            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.preferred_tack))
+
+            # If it's sailable, go straight to it
             if self.sailable(target_locations[location_pointer]):
                 values['current_desired_heading'] = values['direction']
                 self.preferred_tack = 0
-                
-            else:
+                self.preferred_gybe = 0
+
+            # It's not sailable; if it's upwind, tack
+            elif self.upwind(target.locations[location_pointer]):
     
-                if self.preferred_tack == 0:  # If the target is not sailable and you haven't chosen a tack, choose one
+                if self.preferred_tack == 0:  # If the target's upwind and you haven't chosen a tack, choose one
                     self.preferred_tack = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
     
                 if self.preferred_tack == -1:  # If the boat is on a left-of-wind tack
@@ -174,15 +179,59 @@ class LogicThread(StoppableThread):
                     values['current_desired_heading'] = (values['absolute_wind_direction'] + 45 + 360) % 360
                     
                 else:
-                    logging.error('The preferred_tack was %d' % self.preferred_tack)
+                    logging.error("The preferred tack was %d" % self.preferred_tack)
 
+            # Otherwise, gybe
+            elif self.downwind(target.locations[location_pointer]):
+    
+                if self.preferred_gybe == 0:  # If the target's downwind and you haven't chosen a gybe, choose one
+                    self.preferred_gybe = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
+    
+                if self.preferred_gybe == -1:  # If the boat is on a left-of-wind tack
+                    values['current_desired_heading'] = (values['absolute_wind_direction'] + 180 + 45 + 360) % 360
+                    
+                elif self.preferred_gybe == 1: # If the boat is on a right-of-wind tack
+                    values['current_desired_heading'] = (values['absolute_wind_direction'] + 180 - 45 + 360) % 360
+                    
+                else:
+                    logging.error("The preferred gybe was %d" % self.preferred_gybe)
+
+            else:
+                logging.critical('Critical logic error!')
+                    
             self.turn_rudder()
-            self.turn_winch()
             self.check_locations()
             logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d, Sailable: %r\n" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.preferred_tack, self.sailable(target_locations[location_pointer])))
 
-    def turn_rudder(self):
+    # Checks to see if the target location is within a sailable region 
+    def sailable(self, target_location):
+        angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'] + 360) % 360
+        
+        if(math.fabs(angle_of_target_off_the_wind) < 45):
+            return False
 
+        if(math.fabs(angle_of_target_off_the_wind) > (360 - 45)):
+            return False
+        
+        return True
+
+    def upwind(self, target_location):
+        angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'] + 360) % 360
+        return math.fabs(angle_of_target_off_the_wind) < 45
+
+    def downwind(self, target_location):
+        angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'] + 360) % 360
+        return math.fabs(angle_of_target_off_the_wind) > (360 - 45)
+
+    def check_locations(self):
+        global location_pointer
+        logging.debug('Trying to sail to %s' % target_locations[location_pointer])
+
+        if modules.calc.point_proximity(data['location'], target_locations[location_pointer]):
+            logging.debug('Location %s has been reached! Now traveling to %s!' % (target_locations[location_pointer], target_locations[location_pointer + 1]))
+            location_pointer += 1
+
+    def turn_rudder(self):
         # Heading differential
         a = values['current_desired_heading'] - data['heading']
         if (a > 180):
@@ -203,25 +252,8 @@ class LogicThread(StoppableThread):
 
 
     def turn_winch(self):
-
+        # TODO implement winch turning algorithm
         self._kwargs['data_thread'].set_winch_angle(winch_angle)
-            
-    # Checks to see if the target location is within a sailable region        
-    def sailable(self, target_location):
-        angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'])
-        
-        if(math.fabs(angle_of_target_off_the_wind) < 45):
-            return False
-        
-        return True
-
-    def check_locations(self):
-        global location_pointer
-        logging.debug('Trying to sail to %s' % target_locations[location_pointer])
-
-        if modules.calc.point_proximity(data['location'], target_locations[location_pointer]):
-            logging.debug('Location %s has been reached! Now traveling to %s!' % (target_locations[location_pointer], target_locations[location_pointer + 1]))
-            location_pointer += 1
 
 ## ----------------------------------------------------------
 

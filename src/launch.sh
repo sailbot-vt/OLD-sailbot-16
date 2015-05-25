@@ -18,4 +18,4 @@ print_message 'Creating Rudder TCP Socket...'
 python "modules/servo.py" 9107 18 1.5 1.2 &
 
 print_message 'Launching main program...'
-sudo python3 main.py
+sudo python3 autonomous.py

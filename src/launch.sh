@@ -9,6 +9,9 @@ print_message() {
 print_message 'Starting SailBOT'
 
 print_message 'Creating GPSD TCP Socket...'
+cd modules
+gcc -o pgps pgps.c -lgps -lm
+cd ..
 ./modules/pgps 8907 &
 
 print_message 'Creating Wind Sensor TCP Socket...'

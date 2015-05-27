@@ -72,7 +72,7 @@ class ServoController():
                     break
 
                 try:
-                    servo.blink(float(data), self.pin, self.scale_factor, self.zero_point, 100)
+                    servo.blink(float(data), self.pin, self.scale_factor, self.zero_point, 10)
                 except ValueError:
                    generate_error('[Servo Socket]: Recieved extraneous angle value: %s' % data)
 

@@ -67,14 +67,14 @@ class ServoController():
             while True:
 
                 # Receive data from the client
-                data = conn.recv(1024)
+                data = conn.recv(16)
                 if not data:
                     break
 
                 try:
                     servo.blink(float(data), self.pin, self.scale_factor, self.zero_point, 100)
                 except ValueError:
-                   generate_error('[Servo Socket]: Recieved extraneous angle value!')
+                   generate_error('[Servo Socket]: Recieved extraneous angle value: %s' % data)
 
             # Close the connection if the client if the client and server connection is interfered
             conn.close()

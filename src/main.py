@@ -68,4 +68,4 @@ while True:
 
 	print("Set %0.5f and %0.5f" % (winch_angle, rudder_angle))
 
-	time.sleep(1)
+	time.sleep(0.25)

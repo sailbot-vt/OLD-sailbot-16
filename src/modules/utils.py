@@ -46,6 +46,9 @@ def setup_config(values):
         values['transmission_delay'] = config.get('DEFAULT', 'transmission_delay')
         values['eval_delay'] = config.get('DEFAULT', 'eval_delay')
 
+        values['max_winch_angle'] = float(config.get('LOGIC', 'max_winch_angle'))
+        values['max_rudder_angle'] = float(config.get('LOGIC', 'max_rudder_angle'))
+
         modules.calc.point_proximity_radius = float(config.get('LOGIC', 'point_proximity_radius'))
 
         print('Configuration file successfully loaded.')
@@ -53,18 +56,19 @@ def setup_config(values):
     except configparser.NoOptionError:
         print('The locations configuration file could not be found or is malformed!')
 
-    if values['debug']:
-        log_format = '[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s'
+def setup_logging():
 
-        log_path = r'logs/' 
-        if not os.path.exists(log_path): os.makedirs(log_path)
+    log_format = '[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s'
 
-        logging.basicConfig(filename='logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '.log', format=log_format,
-                            datefmt='%H:%M:%S', level=logging.DEBUG)
+    log_path = r'logs/' 
+    if not os.path.exists(log_path): os.makedirs(log_path)
 
-        root = logging.StreamHandler()
-        root.setFormatter(logging.Formatter(log_format, '%H:%M:%S'))
+    logging.basicConfig(filename='logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '.log', format=log_format,
+                        datefmt='%H:%M:%S', level=logging.DEBUG)
 
-        logging.getLogger().addHandler(root)
+    root = logging.StreamHandler()
+    root.setFormatter(logging.Formatter(log_format, '%H:%M:%S'))
 
-        logging.info('Log started on: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    logging.getLogger().addHandler(root)
+
+    logging.info('Log started on: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

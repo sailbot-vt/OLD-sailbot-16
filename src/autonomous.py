@@ -263,6 +263,9 @@ if __name__ == '__main__':
 
         # Sets up the program configuration
         modules.utils.setup_config(values)
+        if values['debug']:
+            modules.utils.setup_logging(values)
+            
         modules.utils.setup_locations(target_locations, boundary_locations)
 
         logging.info('Starting SailBOT!')

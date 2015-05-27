@@ -184,7 +184,7 @@ class LogicThread(StoppableThread):
                 self.preferred_gybe = 0
 
             # It's not sailable; if it's upwind, tack
-            elif self.upwind(target.locations[location_pointer]):
+            elif self.upwind(target_locations[location_pointer]):
     
                 if self.preferred_tack == 0:  # If the target's upwind and you haven't chosen a tack, choose one
                     self.preferred_tack = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
@@ -199,7 +199,7 @@ class LogicThread(StoppableThread):
                     logging.error("The preferred tack was %d" % self.preferred_tack)
 
             # Otherwise, gybe
-            elif self.downwind(target.locations[location_pointer]):
+            elif self.downwind(target_locations[location_pointer]):
     
                 if self.preferred_gybe == 0:  # If the target's downwind and you haven't chosen a gybe, choose one
                     self.preferred_gybe = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
@@ -281,7 +281,7 @@ if __name__ == '__main__':
         # Sets up the program configuration
         modules.utils.setup_config(values)
         if values['debug']:
-            modules.utils.setup_logging(values)
+            modules.utils.setup_logging()
             
         modules.utils.setup_locations(target_locations, boundary_locations)
 

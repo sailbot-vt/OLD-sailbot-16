@@ -149,14 +149,13 @@ class LogicThread(StoppableThread):
         logging.info("Beginning autonomous navigation routines....")
         logging.warn("The angle is: %d" % data['wind_dir'])
 
-
         if (values['event'] == 'default'):
+            logging.info("Starting the default event!")
             self.run_default()
 
-        elif (values['event'] == 'station_keeping')
+        elif (values['event'] == 'station_keeping'):
+            logging.info("Starting the station keeping event!")
             self.run_station_keeping()
-
-
 
     def station_keeping(self):
         while True:

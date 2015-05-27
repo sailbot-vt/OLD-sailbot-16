@@ -24,7 +24,7 @@ states = None
 # Define the socket parameters
 
 HOST = ''
-PORT = 7886
+PORT = 7893
 
 connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
@@ -86,7 +86,7 @@ class ArduinoDevice(threading.Thread):
                 winch = binary[8:15]
                 switch = binary[15:16]
 
-                states = {"rudder": (2 * (int(rudder, 2)/128.0)) - 1, "winch": (2 * (int(winch, 2)/128.0)) - 1, "switch": True if switch == '1' else False }
+                states = {"rudder": (2 * (int(rudder, 2)/128.0)) - 1, "winch": (2 * (int(winch, 2)/64.0)) - 1, "switch": True if switch == '1' else False }
                 time.sleep(0.1)
 
         except IOError:

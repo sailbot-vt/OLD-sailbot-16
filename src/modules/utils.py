@@ -45,6 +45,12 @@ def setup_config(values):
         values['port'] = config.getint('DEFAULT', 'port')
         values['transmission_delay'] = config.get('DEFAULT', 'transmission_delay')
         values['eval_delay'] = config.get('DEFAULT', 'eval_delay')
+        values['max_winch_angle'] = config.get('LOGIC', 'max_winch_angle')
+        values['max_rudder_angle'] = config.get('LOGIC', 'max_rudder_angle')
+        values['max_turn_rate_angle'] = config.get('LOGIC', 'max_turn_rate_angle')
+
+        # Sets the autonomous event
+        values['event'] = config.get('DEFAULT', 'event')
 
         modules.calc.point_proximity_radius = float(config.get('LOGIC', 'point_proximity_radius'))
 

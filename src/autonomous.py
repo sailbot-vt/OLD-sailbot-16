@@ -16,7 +16,8 @@ location_pointer = 0
 
 # Specifies the default values
 values = {'event': 'default', 'debug': False, 'port': 80, 'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
-          'direction': 0, 'absolute_wind_direction': 0, 'max_turn_rate_angle': 70, 'max_rudder_angle': 40, 'max_winch_angle': 70}
+          'direction': 0, 'absolute_wind_direction': 0, 'max_turn_rate_angle': 70, 'max_rudder_angle': 40, 'max_winch_angle': 70,
+          'tack_angle': 45, 'gybe_angle': 20}
 
 ## ----------------------------------------------------------
     
@@ -189,10 +190,10 @@ class LogicThread(StoppableThread):
                     self.preferred_tack = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
     
                 if self.preferred_tack == -1:  # If the boat is on a left-of-wind tack
-                    values['current_desired_heading'] = (values['absolute_wind_direction'] - 45 + 360) % 360
+                    values['current_desired_heading'] = (values['absolute_wind_direction'] - values['tack_angle'] + 360) % 360
                     
                 elif self.preferred_tack == 1: # If the boat is on a right-of-wind tack
-                    values['current_desired_heading'] = (values['absolute_wind_direction'] + 45 + 360) % 360
+                    values['current_desired_heading'] = (values['absolute_wind_direction'] + values['tack_angle'] + 360) % 360
                     
                 else:
                     logging.error("The preferred tack was %d" % self.preferred_tack)
@@ -204,10 +205,10 @@ class LogicThread(StoppableThread):
                     self.preferred_gybe = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
     
                 if self.preferred_gybe == -1:  # If the boat is on a left-of-wind tack
-                    values['current_desired_heading'] = (values['absolute_wind_direction'] + 180 + 45 + 360) % 360
+                    values['current_desired_heading'] = (values['absolute_wind_direction'] + 180 + values['gybe_angle'] + 360) % 360
                     
                 elif self.preferred_gybe == 1: # If the boat is on a right-of-wind tack
-                    values['current_desired_heading'] = (values['absolute_wind_direction'] + 180 - 45 + 360) % 360
+                    values['current_desired_heading'] = (values['absolute_wind_direction'] + 180 - values['gybe_angle'] + 360) % 360
                     
                 else:
                     logging.error("The preferred gybe was %d" % self.preferred_gybe)

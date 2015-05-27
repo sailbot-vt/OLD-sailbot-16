@@ -49,6 +49,10 @@ def setup_config(values):
         values['max_rudder_angle'] = config.get('LOGIC', 'max_rudder_angle')
         values['max_turn_rate_angle'] = config.get('LOGIC', 'max_turn_rate_angle')
 
+        # Sets the tack and gybe angles
+        values['gybe_angle'] = float(config.get('LOGIC', 'gybe_angle'))
+        values['tack_angle'] = float(config.get('LOGIC', 'tack_angle'))
+
         # Sets the autonomous event
         values['event'] = config.get('DEFAULT', 'event')
 

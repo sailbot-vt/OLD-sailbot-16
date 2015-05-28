@@ -17,7 +17,7 @@ location_pointer = 0
 # Specifies the default values
 values = {'event': 'default', 'debug': False, 'port': 80, 'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
           'direction': 0, 'absolute_wind_direction': 0, 'max_turn_rate_angle': 70, 'max_rudder_angle': 40, 'max_winch_angle': 70,
-          'tack_angle': 45, 'gybe_angle': 20, 'preferred_tack': 0, 'preferred_gybe': 0, 'winch_angle': 0}
+          'tack_angle': 45, 'gybe_angle': 20, 'preferred_tack': 0, 'preferred_gybe': 0, 'winch_angle': 0, 'rudder_angle': 0}
 
 ## ----------------------------------------------------------
     
@@ -262,10 +262,10 @@ class LogicThread(StoppableThread):
         if (a < (-1 * values['max_turn_rate_angle'])):
             a = -1 * values['max_turn_rate_angle']
 
-        rudder_angle = 90 + a * (values['max_rudder_angle'] / values['max_turn_rate_angle'])
+        values['rudder_angle'] = 90 + a * (values['max_rudder_angle'] / values['max_turn_rate_angle'])
 
-        logging.debug('Set the rudder angle to: %f' % rudder_angle)
-        self._kwargs['data_thread'].set_rudder_angle(rudder_angle)
+        logging.debug('Set the rudder angle to: %f' % values['rudder_angle'])
+        self._kwargs['data_thread'].set_rudder_angle(values['rudder_angle'])
 
 
     def turn_winch(self):
@@ -284,6 +284,7 @@ class LogicThread(StoppableThread):
 
         values['winch_angle'] = 80 - 40 * (a / (180 - values['gybe_angle'] - values['tack_angle']))
 
+        logging.debug('Set the winch angle to: %f' % values['winch_angle'])
         self._kwargs['data_thread'].set_winch_angle(values['winch_angle'])
 
 ## ----------------------------------------------------------

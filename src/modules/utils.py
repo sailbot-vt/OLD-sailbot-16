@@ -42,11 +42,11 @@ def setup_config(values):
         config.read('config.ini')
 
         values['debug'] = config.getboolean('DEFAULT', 'debug')
-        values['port'] = config.getint('DEFAULT', 'port')
+        values['port'] = float(config.getint('DEFAULT', 'port'))
 
         # Sets execution delays
-        values['transmission_delay'] = config.get('DEFAULT', 'transmission_delay')
-        values['eval_delay'] = config.get('DEFAULT', 'eval_delay')
+        values['transmission_delay'] = float(config.get('DEFAULT', 'transmission_delay'))
+        values['eval_delay'] = float(config.get('DEFAULT', 'eval_delay'))
 
         # Sets the tack and gybe angles
         values['gybe_angle'] = float(config.get('LOGIC', 'gybe_angle'))
@@ -76,9 +76,9 @@ def setup_logging():
     logging.basicConfig(filename='logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '.log', format=log_format,
                         datefmt='%H:%M:%S', level=logging.DEBUG)
 
+    # Add the console to the logging output
     root = logging.StreamHandler()
     root.setFormatter(logging.Formatter(log_format, '%H:%M:%S'))
-
     logging.getLogger().addHandler(root)
 
     logging.info('Log started on: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

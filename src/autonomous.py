@@ -135,7 +135,7 @@ class DataThread(StoppableThread):
             logging.debug('Data sent to the server %s' % json.dumps(json.loads(modules.utils.getJSON(data))))
 
             # Wait in the loop
-            time.sleep(float(values['transmission_delay']))
+            time.sleep(values['transmission_delay'])
 
 
 ## ----------------------------------------------------------
@@ -273,7 +273,7 @@ class LogicThread(StoppableThread):
 
 ## ----------------------------------------------------------
 
-if __name__ == '__main__':
+def main():
     try:
         threading.current_thread().setName('Main')
 
@@ -290,11 +290,13 @@ if __name__ == '__main__':
         logic_thread = LogicThread(name='Logic', kwargs={'data_thread': data_thread})
 
         data_thread.start()
-        time.sleep(0)
         logic_thread.start()
 
+        time.sleep(5)
+
         while True:
-            time.sleep(100)
+            modules.utils.print_terminal(data, values)
+            time.sleep(0.005)
 
     except KeyboardInterrupt:
         logging.critical('Program terminating!')
@@ -309,4 +311,7 @@ if __name__ == '__main__':
         # Terminate the program
         logging.critical('Program exited!')
         sys.exit()
+
+if __name__ == '__main__':
+    main()
             

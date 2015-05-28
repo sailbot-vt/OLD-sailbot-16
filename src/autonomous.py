@@ -250,7 +250,7 @@ class LogicThread(StoppableThread):
 
     def turn_rudder(self):
         # Heading differential
-        a = values['current_desired_heading'] - data['heading']
+        a = ((values['current_desired_heading'] - data['heading']) + 360) % 360
         if (a > 180):
             a -= 360
 
@@ -262,7 +262,7 @@ class LogicThread(StoppableThread):
         if (a < (-1 * values['max_turn_rate_angle'])):
             a = -1 * values['max_turn_rate_angle']
 
-        values['rudder_angle'] = 90 + a * (values['max_rudder_angle'] / values['max_turn_rate_angle'])
+        values['rudder_angle'] = a * (values['max_rudder_angle'] / values['max_turn_rate_angle'])
 
         logging.debug('Set the rudder angle to: %f' % values['rudder_angle'])
         self._kwargs['data_thread'].set_rudder_angle(values['rudder_angle'])

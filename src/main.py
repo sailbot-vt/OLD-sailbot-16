@@ -1,4 +1,4 @@
-import socket, sys, json, time, modules.utils
+import socket, sys, json, time, modules.utils, autonomous
 
 def generate_error(message):
     print('\033[31m\033[1m%s\033[0m\033[39m' % message)
@@ -61,11 +61,15 @@ while True:
 	states = json.loads(arduino_sock.recv(128).decode('utf-8'))
 
 	rudder_angle = float(states['rudder']) * float(values['max_rudder_angle'])
-	winch_angle = float(states['winch']) * float(values['max_winch_angle'])
+	winch_angle = (float(states['winch']) * 20) + 60
 
 	set_rudder_angle(rudder_angle)
 	set_winch_angle(winch_angle)
 
 	print("Set %0.5f and %0.5f" % (winch_angle, rudder_angle))
+
+    if states['switch']
+        generate_error('Leaving manual control for autonomous!')
+        autonomous.main()
 
 	time.sleep(0.25)

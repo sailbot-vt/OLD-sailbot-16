@@ -17,7 +17,7 @@ location_pointer = 0
 # Specifies the default values
 values = {'event': 'default', 'debug': False, 'port': 80, 'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
           'direction': 0, 'absolute_wind_direction': 0, 'max_turn_rate_angle': 70, 'max_rudder_angle': 40, 'max_winch_angle': 70,
-          'tack_angle': 45, 'gybe_angle': 20}
+          'tack_angle': 45, 'gybe_angle': 20, 'preferred_tack': 0, 'preferred_gybe': 0}
 
 ## ----------------------------------------------------------
     
@@ -141,9 +141,6 @@ class DataThread(StoppableThread):
 ## ----------------------------------------------------------
 
 class LogicThread(StoppableThread):
-
-    preferred_tack = 0 # -1 means left tack and 1 means right tack; 0 not on a tack
-    preferred_gybe = 0 # -1 means left-of-wind gybe and 1 means right-of-wind gybe; 0 not on a gybe
     
     def run(self):
         logging.info("Beginning autonomous navigation routines....")
@@ -173,51 +170,52 @@ class LogicThread(StoppableThread):
             values['direction'] = modules.calc.direction_to_point(data['location'], target_locations[0])
             values['absolute_wind_direction'] = data['wind_dir'] + data['heading']
             
-            time.sleep(float(values['eval_delay']))
-            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.preferred_tack))
+            time.sleep(values['eval_delay'])
+            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d, Preferred Gybe: %d" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], values['preferred_tack'], values['preferred_gybe']))
+            logging.debug("Upwind: %r, Downwind: %r" % (self.upwind(target_locations[location_pointer]), self.downwind(target_locations[location_pointer])))
 
             # If it's sailable, go straight to it
             if self.sailable(target_locations[location_pointer]):
                 values['current_desired_heading'] = values['direction']
-                self.preferred_tack = 0
-                self.preferred_gybe = 0
+                values['preferred_tack'] = 0
+                values['preferred_gybe'] = 0
 
             # It's not sailable; if it's upwind, tack
             elif self.upwind(target_locations[location_pointer]):
     
-                if self.preferred_tack == 0:  # If the target's upwind and you haven't chosen a tack, choose one
-                    self.preferred_tack = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
+                if values['preferred_tack'] == 0:  # If the target's upwind and you haven't chosen a tack, choose one
+                    values['preferred_tack'] = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
     
-                if self.preferred_tack == -1:  # If the boat is on a left-of-wind tack
+                if values['preferred_tack'] == -1:  # If the boat is on a left-of-wind tack
                     values['current_desired_heading'] = (values['absolute_wind_direction'] - values['tack_angle'] + 360) % 360
                     
-                elif self.preferred_tack == 1: # If the boat is on a right-of-wind tack
+                elif values['preferred_tack'] == 1: # If the boat is on a right-of-wind tack
                     values['current_desired_heading'] = (values['absolute_wind_direction'] + values['tack_angle'] + 360) % 360
                     
                 else:
-                    logging.error("The preferred tack was %d" % self.preferred_tack)
+                    logging.error("The preferred tack was %d" % values['preferred_tack'])
 
             # Otherwise, gybe
             elif self.downwind(target_locations[location_pointer]):
     
-                if self.preferred_gybe == 0:  # If the target's downwind and you haven't chosen a gybe, choose one
-                    self.preferred_gybe = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
+                if values['preferred_gybe'] == 0:  # If the target's downwind and you haven't chosen a gybe, choose one
+                    values['preferred_gybe'] = (180 - ((data['heading'] - values['absolute_wind_direction']) % 360)) / math.fabs(180 - ((data['heading'] - values['absolute_wind_direction']) % 360))
     
-                if self.preferred_gybe == -1:  # If the boat is on a left-of-wind tack
+                if values['preferred_gybe'] == -1:  # If the boat is on a left-of-wind tack
                     values['current_desired_heading'] = (values['absolute_wind_direction'] + 180 + values['gybe_angle'] + 360) % 360
                     
-                elif self.preferred_gybe == 1: # If the boat is on a right-of-wind tack
+                elif values['preferred_gybe'] == 1: # If the boat is on a right-of-wind tack
                     values['current_desired_heading'] = (values['absolute_wind_direction'] + 180 - values['gybe_angle'] + 360) % 360
                     
                 else:
-                    logging.error("The preferred gybe was %d" % self.preferred_gybe)
+                    logging.error("The preferred gybe was %d" % values['preferred_gybe'])
 
             else:
                 logging.critical('Critical logic error!')
                     
             self.turn_rudder()
             self.check_locations()
-            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d, Sailable: %r\n" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.preferred_tack, self.sailable(target_locations[location_pointer])))
+            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Sailable: %r\n" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.sailable(target_locations[location_pointer])))
 
     # Checks to see if the target location is within a sailable region 
     def sailable(self, target_location):

@@ -21,10 +21,7 @@ print_message 'Creating Arduino TCP Socket...'
 python "modules/arduino_read.py" &
 
 print_message 'Creating Rudder TCP Socket...'
-sudo python "modules/servo.py" 9107 18 1.5 1.2 &
+sudo python "modules/servo.py" 9107 18 1.5 1.1 &
 
 print_message 'Creating Winch TCP Socket...'
 sudo python "modules/servo.py" 9108 16 1.5 1.2 &
-
-print_message 'Launching main program...'
-sudo python3 main.py

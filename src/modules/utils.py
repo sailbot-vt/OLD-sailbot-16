@@ -32,6 +32,40 @@ def setup_locations(target_locations, boundary_locations):
     except ValueError:
         logging.error('The locations JSON file is malformed!')
 
+yellow = "\033[33m\033[1m"
+green = "\033[32m\033[1m"
+purple = "\033[35m\033[1m"
+reset = "\033[0m\033[39m"
+
+def print_terminal(data, values):
+    print('\033c')
+    print('%sTimestamp: %s' % (yellow, data['timestamp']))
+    print('Location: %s%s' % (data['location'], reset))
+    print('Heading: %0.5f' % data['heading'])
+    print('Speed: %0.5f' % data['speed'])
+    print('Wind Direction: %0.5f\n' % data['wind_dir'])
+    print('Roll: %0.5f' % data['roll'])
+    print('Pitch: %0.5f' % data['pitch'])
+    print('Yaw: %0.5f\n' % data['yaw'])
+
+    print('%sEvent: %s' % (green, values['event']))
+    print('Debug: %r%s' % (values['debug'], reset))
+    print('Web server port: %d\n' % values['port'])
+    print('Transmission delay: %d' % values['transmission_delay'])
+    print('Logic evaluation delay: %d\n' % values['eval_delay'])
+    print('%sCurrent desired heading: %d' % (purple, values['current_desired_heading']))
+    print('Direction: %d' % values['direction'])
+    print('Absolute wind direction: %d%s\n' % (values['absolute_wind_direction'], reset))
+    print('Max turn rate angle: %d' % values['max_turn_rate_angle'])
+    print('Max rudder angle: %d' % values['max_rudder_angle'])
+    print('Max winch angle: %d\n' % values['max_winch_angle'])
+    print('Preferred tack: %d' % values['preferred_tack'])
+    print('Preferred gybe: %d\n' % values['preferred_gybe'])
+    print('Tack angle: %d' % values['tack_angle'])
+    print('Gybe angle: %d\n\n' % values['gybe_angle'])
+
+    time.sleep(0.995)
+
 def setup_config(values):
 
     # Logging in this method must stay as print statements because the logger

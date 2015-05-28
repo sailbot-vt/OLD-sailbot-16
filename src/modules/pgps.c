@@ -13,7 +13,7 @@
 // GPSD specific libraries
 #include <gps.h>
 #include "../lib/gpsd_config.h"
-#include "../lib/gpsdclient.h"
+#include "../lib/gpsd_client.h"
 
 static time_t status_timer;
 static struct fixsource_t source;

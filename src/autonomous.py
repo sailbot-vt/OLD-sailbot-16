@@ -17,7 +17,7 @@ location_pointer = 0
 # Specifies the default values
 values = {'event': 'default', 'debug': False, 'port': 80, 'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
           'direction': 0, 'absolute_wind_direction': 0, 'max_turn_rate_angle': 70, 'max_rudder_angle': 40, 'max_winch_angle': 70,
-          'tack_angle': 45, 'gybe_angle': 20, 'preferred_tack': 0, 'preferred_gybe': 0}
+          'tack_angle': 45, 'gybe_angle': 20, 'preferred_tack': 0, 'preferred_gybe': 0, 'winch_angle': 0}
 
 ## ----------------------------------------------------------
     
@@ -282,9 +282,9 @@ class LogicThread(StoppableThread):
 
         a -= values['tack_angle']
 
-        winch_angle = 80 - 40 * (a / (180 - values['gybe_angle'] - values['tack_angle']))
+        values['winch_angle'] = 80 - 40 * (a / (180 - values['gybe_angle'] - values['tack_angle']))
 
-        self._kwargs['data_thread'].set_winch_angle(winch_angle)
+        self._kwargs['data_thread'].set_winch_angle(values['winch_angle'])
 
 ## ----------------------------------------------------------
 

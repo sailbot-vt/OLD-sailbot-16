@@ -61,6 +61,7 @@ def print_terminal(data, values):
     print('Max winch angle: %d\n' % values['max_winch_angle'])
     print('Preferred tack: %d' % values['preferred_tack'])
     print('Preferred gybe: %d\n' % values['preferred_gybe'])
+    print('Winch angle: %d\n' % values['winch_angle'])
     print('Tack angle: %d' % values['tack_angle'])
     print('Gybe angle: %d\n\n' % values['gybe_angle'])
 

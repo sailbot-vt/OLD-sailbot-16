@@ -269,7 +269,21 @@ class LogicThread(StoppableThread):
 
 
     def turn_winch(self):
-        # TODO implement winch turning algorithm
+        a = data['wind_dir']
+
+        if data['wind_dir'] > 180:
+            a = 360 - a
+
+        if a > (180 - values['gybe_angle']):
+            a = 180 - values['gybe_angle']
+
+        elif a < values['tack_angle']:
+            a = values['tack_angle']
+
+        a -= values['tack_angle']
+
+        winch_angle = 80 - 40 * (a / (180 - values['gybe_angle'] - values['tack_angle']))
+
         self._kwargs['data_thread'].set_winch_angle(winch_angle)
 
 ## ----------------------------------------------------------

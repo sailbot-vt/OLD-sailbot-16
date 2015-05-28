@@ -222,22 +222,25 @@ class LogicThread(StoppableThread):
     # Checks to see if the target location is within a sailable region 
     def sailable(self, target_location):
         angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'] + 360) % 360
-        
-        if(math.fabs(angle_of_target_off_the_wind) < 45):
+
+        if angle_of_target_off_the_wind < values['tack_angle']:
             return False
 
-        if(math.fabs(angle_of_target_off_the_wind) > (360 - 45)):
+        if angle_of_target_off_the_wind > (360 - values['tack_angle']):
             return False
         
+        if (angle_of_target_off_the_wind > (180 - values['gybe_angle'])) and (angle_of_target_off_the_wind < (180 + values['gybe_angle'])):
+            return False
+
         return True
 
     def upwind(self, target_location):
         angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'] + 360) % 360
-        return math.fabs(angle_of_target_off_the_wind) < 45
+        return (angle_of_target_off_the_wind < values['tack_angle']) or (angle_of_target_off_the_wind > (360 - values['tack_angle']))
 
     def downwind(self, target_location):
         angle_of_target_off_the_wind = (values['direction'] - values['absolute_wind_direction'] + 360) % 360
-        return math.fabs(angle_of_target_off_the_wind) > (360 - 45)
+        return (angle_of_target_off_the_wind > (180 - values['gybe_angle'])) and (angle_of_target_off_the_wind < (180 + values['gybe_angle']))
 
     def check_locations(self):
         global location_pointer

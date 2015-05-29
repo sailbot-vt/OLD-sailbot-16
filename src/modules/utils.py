@@ -95,6 +95,8 @@ def setup_config(values):
         values['max_rudder_angle'] = float(config.get('LOGIC', 'max_rudder_angle'))
         values['max_turn_rate_angle'] = float(config.get('LOGIC', 'max_turn_rate_angle'))
 
+        values['station_keeping_timeout'] = float(config.get('DEFAULT', 'station_keeping_timeout'))
+
         modules.calc.point_proximity_radius = float(config.get('LOGIC', 'point_proximity_radius'))
 
         print('Configuration file successfully loaded.')

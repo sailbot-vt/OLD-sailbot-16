@@ -146,8 +146,8 @@ class LogicThread(StoppableThread):
         
         logging.debug("Station keeping elapsed time: %s" % time_elapsed)
 	
-        # If the correct amount of time has elapsed, switch targets
-        if time_elapsed > 30:
+        # If the correct amount of time has elapsed (converting minutes to seconds), switch targets
+        if time_elapsed > (values['station_keeping_timeout'] * 60):
             for i in range(len(target_locations)):
                     target_locations[i] = Location(0, 0)
             logging.warn("Switched targets!")

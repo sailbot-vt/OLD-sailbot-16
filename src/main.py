@@ -71,6 +71,7 @@ while True:
     if states['switch']:
         generate_error('Leaving manual control for autonomous!')
         autonomous.main()
+        generate_error('Manual control caught exited autonomous process! Continuing!')
 
     time.sleep(0.25)            
             

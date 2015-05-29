@@ -305,12 +305,41 @@ def main():
         data_thread = DataThread(name='Data')
         logic_thread = LogicThread(name='Logic', kwargs={'data_thread': data_thread})
 
+        # Start the threads
         data_thread.start()
         logic_thread.start()
+
+        # Create the Arduino socket
+        try:
+            arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            arduino_sock.connect(("localhost", 7893))
+        except socket.error:
+            logging.critical("Could not connect to Arduino socket")
+            pass
 
         time.sleep(5)
 
         while True:
+            # Query the Arduino socket
+            arduino_sock.send(str(0).encode('utf-8'))
+            states = json.loads(arduino_sock.recv(128).decode('utf-8'))
+
+            # If the RC controller switch is turned off, leave the main loop and kill the threads
+            if not states['switch']:
+                logging.critical('Autonomous shutting down! Going back to manual control!')
+
+                # Stop the threads
+                data_thread.stop()
+                logic_thread.stop()
+
+                # Join the threads into the main threads
+                data_thread.join()
+                logic_thread.join()
+
+                # Terminate the program
+                logging.critical('Autonomous gracefully exited!')
+                break
+
             modules.utils.print_terminal(data, values)
             time.sleep(0.005)
 

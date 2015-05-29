@@ -17,7 +17,7 @@ location_pointer = 0
 # Specifies the default values
 values = {'event': 'default', 'debug': False, 'port': 80, 'transmission_delay': 5, 'eval_delay': 5, 'current_desired_heading': 0,
           'direction': 0, 'absolute_wind_direction': 0, 'max_turn_rate_angle': 70, 'max_rudder_angle': 40, 'max_winch_angle': 70,
-          'tack_angle': 45, 'gybe_angle': 20, 'preferred_tack': 0, 'preferred_gybe': 0, 'winch_angle': 0, 'rudder_angle': 0}
+          'tack_angle': 45, 'gybe_angle': 20, 'preferred_tack': 0, 'preferred_gybe': 0, 'winch_angle': 0, 'rudder_angle': 0, 'start_time': 0}
 
 ## ----------------------------------------------------------
     
@@ -115,8 +115,6 @@ class DataThread(StoppableThread):
 
                 # Add the location as an embeded data structure
                 data['location'] = Location(gps_parsed['latitude'], gps_parsed['longitude'])
-
-                data['heading'] = 180
                 
             except (AttributeError, ValueError, socket.error) as e:
                 logging.error('The GPS socket is broken or sent malformed data!')
@@ -142,25 +140,26 @@ class DataThread(StoppableThread):
 
 class LogicThread(StoppableThread):
     
+    def station_keeping(self):
+        
+        time_elapsed = time.time() - values['start_time']
+        
+        logging.debug("Station keeping elapsed time: %s" % time_elapsed)
+	
+        # If the correct amount of time has elapsed, switch targets
+        if time_elapsed > 30:
+            for i in range(len(target_locations)):
+                    target_locations[i] = Location(0, 0)
+            logging.warn("Switched targets!")
+	
+
     def run(self):
+
         logging.info("Beginning autonomous navigation routines....")
         logging.warn("The angle is: %d" % data['wind_dir'])
 
-        if (values['event'] == 'default'):
-            logging.info("Starting the default event!")
-            self.run_default()
+        values['start_time'] = time.time()
 
-        elif (values['event'] == 'station_keeping'):
-            logging.info("Starting the station keeping event!")
-            self.run_station_keeping()
-
-    def station_keeping(self):
-        while True:
-
-            if self.stopped():
-                break    
-    
-    def run_default(self):
         while True:
 
             if self.stopped():
@@ -213,8 +212,14 @@ class LogicThread(StoppableThread):
             else:
                 logging.critical('Critical logic error!')
                     
+            # Deal with events
+            if values['event'] == 'station_keeping':
+                self.station_keeping()
+
             self.turn_rudder()
+            self.turn_winch()
             self.check_locations()
+
             logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Sailable: %r\n" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.sailable(target_locations[location_pointer])))
 
     # Checks to see if the target location is within a sailable region 
@@ -242,7 +247,7 @@ class LogicThread(StoppableThread):
 
     def check_locations(self):
         global location_pointer
-        logging.debug('Trying to sail to %s' % target_locations[location_pointer])
+        logging.debug('Trying to sail to %s, %s m away' % (target_locations[location_pointer], modules.calc.distance(data['location'], target_locations[location_pointer])))
 
         if modules.calc.point_proximity(data['location'], target_locations[location_pointer]):
             logging.debug('Location %s has been reached! Now traveling to %s!' % (target_locations[location_pointer], target_locations[location_pointer + 1]))

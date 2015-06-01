@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import json, logging, configparser, modules.calc, time, os
+import json, logging, configparser, modules.calc, time, os, sys
 from modules.location import Location
 from datetime import datetime
 
@@ -27,10 +27,12 @@ def setup_locations(target_locations, boundary_locations):
         logging.info("Loaded the following target locations: %s" % i)
         logging.info("Loaded the following boundary locations: %s" % j)
         
-    except FileNotFoundError:
+    except IOError:
         logging.error('The locations JSON file could not be found!')
+        sys.exit()
     except ValueError:
         logging.error('The locations JSON file is malformed!')
+        sys.exit()
 
 yellow = "\033[33m\033[1m"
 green = "\033[32m\033[1m"

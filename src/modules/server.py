@@ -93,7 +93,7 @@ class ServerThread(StoppableThread):
             global http_server, main_loop
 
             http_server = tornado.httpserver.HTTPServer(application)
-            http_server.listen(self._kwargs['port'])
+            http_server.listen(int(self._kwargs['port']))
 
             main_loop = tornado.ioloop.IOLoop.instance()
 

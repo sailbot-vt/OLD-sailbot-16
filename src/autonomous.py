@@ -108,7 +108,7 @@ class DataThread(StoppableThread):
             # Query and update the GPS data
             try:
                 gps_sock.send(str(0).encode('utf-8'))
-                gps_parsed = json.loads(gps_sock.recv(128).decode('utf-8').strip('\x00'))
+                gps_parsed = json.loads(gps_sock.recv(256).decode('utf-8').strip('\x00'))
 
                 # Update the data object
                 data.update(gps_parsed)

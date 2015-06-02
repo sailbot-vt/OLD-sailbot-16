@@ -18,10 +18,3 @@ sudo apt-get update
 
 print_message 'Setting up Tornado Web Server...'
 sudo pip-3.2 install tornado
-
-print_message 'Pulling project from repository...'
-cd ~/
-mkdir SailBOT
-cd SailBOT
-git clone https://github.com/jamestaylr/sailbot.git
-

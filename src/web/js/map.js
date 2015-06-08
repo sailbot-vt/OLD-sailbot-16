@@ -68,7 +68,7 @@ function initialize() {
 
 	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-	boat_marker = new CustomMarker({
+	boat_marker = new RichMarker({
 		position : map.getCenter(),
 		map : map,
 		content : '<div class="boat"></div>',
@@ -86,7 +86,7 @@ function update_boat_marker(lat, long) {
 function add_marker(type, lat, long) {
 	var location = new google.maps.LatLng(lat, long);
 
-	var marker = new CustomMarker({
+	var marker = new RichMarker({
 		position : location,
 		map : map,
 		content : '<div class="' + type + '"></div>',

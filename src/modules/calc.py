@@ -24,16 +24,7 @@ def get_heading_angle(heading, current_point, target_point):
     return heading - angle
 
 def point_proximity(current_point, target_point):
-    a = math.sin(math.radians(current_point['latitude']))
-    b = math.sin(math.radians(target_point['latitude']))
-    c = math.cos(math.radians(current_point['latitude']))
-    d = math.cos(math.radians(target_point['latitude']))
-    
-    e = a * b + c * d * math.cos((math.radians(target_point['longitude'] - current_point['longitude'])))
-    f = math.acos(e)
-    distance = f * 6371 * 1000
-    
-    return (distance <= point_proximity_radius)
+    return (distance(current_point, target_point) <= point_proximity_radius)
 
 def distance(point1, point2):
     a = math.sin(math.radians(point1['latitude']))

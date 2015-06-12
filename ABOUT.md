@@ -54,7 +54,7 @@ A sample configuration file looks like this:
 
 **Loading locations**
 
-The code will then try to load locations from `locations.json` in the root `src` folder. This is written as JSON in accordance to the `Location` module.
+The code will then try to load locations from `locations.json` in the root `src` folder. This is written as JSON with `latitude` and `longitude` keys.
 
 A default `locations.json` should look like this:
 

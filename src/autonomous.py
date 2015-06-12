@@ -1,12 +1,11 @@
 #!/usr/bin/python
 import time, threading, json, logging, tornado.websocket, modules.calc, math, modules.utils, modules.log, socket, sys
 from modules.server import ServerThread
-from modules.location import Location
 from modules.calc import direction_to_point
 from modules.control_thread import StoppableThread
 
 # Variables and constants
-data = {'category': 'data', 'timestamp': 0, 'location': Location(0, 0),
+data = {'category': 'data', 'timestamp': 0, 'location': { "latitude": 0, "longitude": 0 },
         'heading': 0, 'speed': 0, 'wind_dir': 0, 'roll': 0, 'pitch': 0,
         'yaw': 0}
 

@@ -1,31 +1,23 @@
 #!/usr/bin/python
 import json, logging, configparser, modules.calc, time, os, sys
-from modules.location import Location
 from datetime import datetime
 
 def getJSON(obj):
     return json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-
-def location_decoder(obj):
-    return Location(obj['latitude'], obj['longitude'])
 
 def setup_locations(target_locations, boundary_locations):
     try:
         with open('locations.json', 'r') as myfile:
             json_data = json.loads(myfile.read().replace('\n', ''))
 
-        i = []
-        j = []
         
         for location in json_data['target_locations']:
-            target_locations.append(location_decoder(location))
-            i.append(location_decoder(location).__str__())
+            target_locations.append({"latitude": location["latitude"], "longitude": location["longitude"]})
         for location in json_data['boundary_locations']:
-            boundary_locations.append(location_decoder(location))
-            j.append(location_decoder(location).__str__())
+            boundary_locations.append({"latitude": location["latitude"], "longitude": location["longitude"]})
             
-        logging.info("Loaded the following target locations: %s" % i)
-        logging.info("Loaded the following boundary locations: %s" % j)
+        logging.info("Loaded the following target locations: %s" % target_locations)
+        logging.info("Loaded the following boundary locations: %s" % boundary_locations)
         
     except IOError:
         logging.error('The locations JSON file could not be found!')

@@ -9,9 +9,9 @@ import math
 point_proximity_radius = 5
 
 def direction_to_point(current_point, target_point):
-    a = math.radians(current_point.latitude)
-    b = math.radians(target_point.latitude)
-    d = math.radians(target_point.longitude - current_point.longitude)
+    a = math.radians(current_point['latitude'])
+    b = math.radians(target_point['latitude'])
+    d = math.radians(target_point['longitude'] - current_point['longitude'])
     
     y = math.sin(d) * math.cos(b)
     x = math.cos(a) * math.sin(b) - math.sin(a) * math.cos(b) * math.cos(d)
@@ -24,24 +24,24 @@ def get_heading_angle(heading, current_point, target_point):
     return heading - angle
 
 def point_proximity(current_point, target_point):
-    a = math.sin(math.radians(current_point.latitude))
-    b = math.sin(math.radians(target_point.latitude))
-    c = math.cos(math.radians(current_point.latitude))
-    d = math.cos(math.radians(target_point.latitude))
+    a = math.sin(math.radians(current_point['latitude']))
+    b = math.sin(math.radians(target_point['latitude']))
+    c = math.cos(math.radians(current_point['latitude']))
+    d = math.cos(math.radians(target_point['latitude']))
     
-    e = a * b + c * d * math.cos((math.radians(target_point.longitude - current_point.longitude)))
+    e = a * b + c * d * math.cos((math.radians(target_point['longitude'] - current_point['longitude'])))
     f = math.acos(e)
     distance = f * 6371 * 1000
     
     return (distance <= point_proximity_radius)
 
 def distance(point1, point2):
-    a = math.sin(math.radians(point1.latitude))
-    b = math.sin(math.radians(point2.latitude))
-    c = math.cos(math.radians(point1.latitude))
-    d = math.cos(math.radians(point2.latitude))
+    a = math.sin(math.radians(point1['latitude']))
+    b = math.sin(math.radians(point2['latitude']))
+    c = math.cos(math.radians(point1['latitude']))
+    d = math.cos(math.radians(point2['latitude']))
 
-    e = a * b + c * d * math.cos((math.radians(point2.longitude - point1.longitude)))
+    e = a * b + c * d * math.cos((math.radians(point2['longitude'] - point1['longitude'])))
     f = math.acos(e)
 
     return f * 6371 * 1000

@@ -45,25 +45,29 @@ def main():
         time.sleep(5)
 
         while True:
-            # Query the Arduino socket
-            arduino_sock.send(str(0).encode('utf-8'))
-            states = json.loads(arduino_sock.recv(128).decode('utf-8'))
+            try:
+                # Query the Arduino socket
+                arduino_sock.send(str(0).encode('utf-8'))
+                states = json.loads(arduino_sock.recv(128).decode('utf-8'))
 
-            # If the RC controller switch is turned off, leave the main loop and kill the threads
-            if not states['switch']:
-                logging.critical('Autonomous shutting down! Going back to manual control!')
+                # If the RC controller switch is turned off, leave the main loop and kill the threads
+                if not states['switch']:
+                    logging.critical('Autonomous shutting down! Going back to manual control!')
 
-                # Stop the threads
-                data_thread.stop()
-                logic_thread.stop()
+                    # Stop the threads
+                    data_thread.stop()
+                    logic_thread.stop()
 
-                # Join the threads into the main threads
-                data_thread.join()
-                logic_thread.join()
+                    # Join the threads into the main threads
+                    data_thread.join()
+                    logic_thread.join()
 
-                # Terminate the program
-                logging.critical('Autonomous gracefully exited!')
-                break
+                    # Terminate the program
+                    logging.critical('Autonomous gracefully exited!')
+                    break
+
+            except socket.error:
+                logging.critical("Could not connect to the Arduino socket, check your wiring!")
 
             modules.utils.print_terminal(data, values)
             time.sleep(0.005)

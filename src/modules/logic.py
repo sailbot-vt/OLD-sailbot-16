@@ -2,6 +2,8 @@
 import logging, socket, time, modules.calc
 from .control_thread import StoppableThread
 
+logger = logging.getLogger('log')
+
 class LogicThread(StoppableThread):
     
     data = None
@@ -21,19 +23,19 @@ class LogicThread(StoppableThread):
         
         time_elapsed = time.time() - values['start_time']
         
-        logging.debug("Station keeping elapsed time: %s" % time_elapsed)
+        logger.debug("Station keeping elapsed time: %s" % time_elapsed)
 	
         # If the correct amount of time has elapsed (converting minutes to seconds), switch targets
         if time_elapsed > (values['station_keeping_timeout'] * 60):
             for i in range(len(target_locations)):
                     target_locations[i] = Location(0, 0)
-            logging.warn("Switched targets!")
+            logger.warn("Switched targets!")
 	
 
     def run(self):
 
-        logging.info("Beginning autonomous navigation routines....")
-        logging.warn("The angle is: %d" % data['wind_dir'])
+        logger.info("Beginning autonomous navigation routines....")
+        logger.warn("The angle is: %d" % data['wind_dir'])
 
         values['start_time'] = time.time()
 
@@ -47,8 +49,8 @@ class LogicThread(StoppableThread):
             values['absolute_wind_direction'] = data['wind_dir'] + data['heading']
             
             time.sleep(values['eval_delay'])
-            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d, Preferred Gybe: %d" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], values['preferred_tack'], values['preferred_gybe']))
-            logging.debug("Upwind: %r, Downwind: %r" % (self.upwind(values['target_locations'][values['location_pointer']]), self.downwind(values['target_locations'][values['location_pointer']])))
+            logger.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Preferred Tack: %d, Preferred Gybe: %d" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], values['preferred_tack'], values['preferred_gybe']))
+            logger.debug("Upwind: %r, Downwind: %r" % (self.upwind(values['target_locations'][values['location_pointer']]), self.downwind(values['target_locations'][values['location_pointer']])))
 
             # If it's sailable, go straight to it
             if self.sailable(values['target_locations'][values['location_pointer']]):
@@ -69,7 +71,7 @@ class LogicThread(StoppableThread):
                     values['current_desired_heading'] = (values['absolute_wind_direction'] + values['tack_angle'] + 360) % 360
                     
                 else:
-                    logging.error("The preferred tack was %d" % values['preferred_tack'])
+                    logger.error("The preferred tack was %d" % values['preferred_tack'])
 
             # Otherwise, gybe
             elif self.downwind(values['target_locations'][values['location_pointer']]):
@@ -84,10 +86,10 @@ class LogicThread(StoppableThread):
                     values['current_desired_heading'] = (values['absolute_wind_direction'] + 180 - values['gybe_angle'] + 360) % 360
                     
                 else:
-                    logging.error("The preferred gybe was %d" % values['preferred_gybe'])
+                    logger.error("The preferred gybe was %d" % values['preferred_gybe'])
 
             else:
-                logging.critical('Critical logic error!')
+                logger.critical('Critical logic error!')
                     
             # Deal with events
             if values['event'] == 'station_keeping':
@@ -97,7 +99,7 @@ class LogicThread(StoppableThread):
             self.turn_winch()
             self.check_locations()
 
-            logging.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Sailable: %r\n" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.sailable(values['target_locations'][values['location_pointer']])))
+            logger.debug("Heading: %d, Direction: %d, Wind: %d, Absolute Wind Direction: %d, Current Desired Heading: %d, Sailable: %r\n" % (data['heading'], values['direction'], data['wind_dir'], values['absolute_wind_direction'], values['current_desired_heading'], self.sailable(values['target_locations'][values['location_pointer']])))
 
     # Checks to see if the target location is within a sailable region 
     def sailable(self, target_location):
@@ -124,10 +126,10 @@ class LogicThread(StoppableThread):
 
     def check_locations(self):
         global location_pointer
-        logging.debug('Trying to sail to %s, %s m away' % (values['target_locations'][values['location_pointer']], modules.calc.distance(data['location'], values['target_locations'][values['location_pointer']])))
+        logger.debug('Trying to sail to %s, %s m away' % (values['target_locations'][values['location_pointer']], modules.calc.distance(data['location'], values['target_locations'][values['location_pointer']])))
 
         if modules.calc.point_proximity(data['location'], values['target_locations'][values['location_pointer']]):
-            logging.debug('Location %s has been reached! Now traveling to %s!' % (values['target_locations'][values['location_pointer']], values['target_locations'][values['location_pointer'] + 1]))
+            logger.debug('Location %s has been reached! Now traveling to %s!' % (values['target_locations'][values['location_pointer']], values['target_locations'][values['location_pointer'] + 1]))
             location_pointer += 1
 
     def turn_rudder(self):
@@ -146,7 +148,7 @@ class LogicThread(StoppableThread):
 
         values['rudder_angle'] = a * (values['max_rudder_angle'] / values['max_turn_rate_angle'])
 
-        logging.debug('Set the rudder angle to: %f' % values['rudder_angle'])
+        logger.debug('Set the rudder angle to: %f' % values['rudder_angle'])
         self._kwargs['data_thread'].set_rudder_angle(values['rudder_angle'])
 
 
@@ -166,5 +168,5 @@ class LogicThread(StoppableThread):
 
         values['winch_angle'] = 80 - 40 * (a / (180 - values['gybe_angle'] - values['tack_angle']))
 
-        logging.debug('Set the winch angle to: %f' % values['winch_angle'])
+        logger.debug('Set the winch angle to: %f' % values['winch_angle'])
         self._kwargs['data_thread'].set_winch_angle(values['winch_angle'])

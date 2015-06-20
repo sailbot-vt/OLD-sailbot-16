@@ -1,7 +1,42 @@
 #!/usr/bin/python
 import json, logging, configparser, modules.calc, time, os, sys
+import json, logging, configparser, modules.calc, time, os, sys, modules.log
 from datetime import datetime
 
+logger = logging.getLogger('log')
+
+def setup_logging():
+    screen = curses.initscr()
+    screen.nodelay(1)
+    screen.border(0)
+
+    maxy, maxx = screen.getmaxyx()
+
+    height = 20
+    # height, width, begin_y, begin_x
+    win = curses.newwin(height, maxx-4, maxy-(height + 1), 2)
+
+
+    curses.setsyx(-1, -1)
+    screen.addstr(1,2, "SailBOT: the most advanced collegiate sailing operating system")
+    screen.refresh()
+    win.refresh()
+    win.scrollok(True)
+    win.idlok(True)
+    win.leaveok(True)
+
+    mh = modules.log.CursesHandler(win)
+    formatterDisplay = logging.Formatter('[%(asctime)s] %(levelname)-0s: %(message)s', '%H:%M:%S')
+    mh.setFormatter(formatterDisplay)
+    logger.addHandler(mh)
+    logger.setLevel(logging.DEBUG)
+
+def shutdown_terminal():
+    curses.curs_set(1)
+    curses.nocbreak()
+    curses.echo()
+    curses.endwin()
+   
 def getJSON(obj):
     return json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
@@ -16,14 +51,14 @@ def setup_locations(target_locations, boundary_locations):
         for location in json_data['boundary_locations']:
             boundary_locations.append({"latitude": location["latitude"], "longitude": location["longitude"]})
             
-        logging.info("Loaded the following target locations: %s" % target_locations)
-        logging.info("Loaded the following boundary locations: %s" % boundary_locations)
+        logger.info("Loaded the following target locations: %s" % target_locations)
+        logger.info("Loaded the following boundary locations: %s" % boundary_locations)
         
     except IOError:
-        logging.error('The locations JSON file could not be found!')
+        logger.error('The locations JSON file could not be found!')
         sys.exit()
     except ValueError:
-        logging.error('The locations JSON file is malformed!')
+        logger.error('The locations JSON file is malformed!')
         sys.exit()
 
 yellow = "\033[33m\033[1m"
@@ -98,19 +133,3 @@ def setup_config(values):
     except configparser.NoOptionError:
         print('The locations configuration file could not be found or is malformed!')
 
-def setup_logging():
-
-    log_format = '[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s'
-
-    log_path = r'logs/' 
-    if not os.path.exists(log_path): os.makedirs(log_path)
-
-    logging.basicConfig(filename='logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '.log', format=log_format,
-                        datefmt='%H:%M:%S', level=logging.DEBUG)
-
-    # Add the console to the logging output
-    root = logging.StreamHandler()
-    root.setFormatter(logging.Formatter(log_format, '%H:%M:%S'))
-    logging.getLogger().addHandler(root)
-
-    logging.info('Log started on: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

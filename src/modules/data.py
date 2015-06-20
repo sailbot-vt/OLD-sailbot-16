@@ -6,6 +6,8 @@ from .utils import getJSON
 from .control_thread import StoppableThread
 from .server import ServerThread
 
+logger = logging.getLogger('log')
+
 class DataThread(StoppableThread):
 
     server_thread = None
@@ -25,7 +27,7 @@ class DataThread(StoppableThread):
             rudder_sock.connect(("localhost", 9107))
         except socket.error:
             # Connection refused error
-            logging.critical("Could not connect to servo socket")
+            logger.critical("Could not connect to servo socket")
 
         global winch_sock
         try:
@@ -33,25 +35,25 @@ class DataThread(StoppableThread):
             winch_sock.connect(("localhost", 9108))
         except socket.error:
             # Connection refused error
-            logging.critical("Could not connect to servo socket")
+            logger.critical("Could not connect to servo socket")
 
 
         # Set up logging to the web server console
-        logging.getLogger().addHandler(WebSocketLogger(self))
+        # logging.getLogger('log').addHandler(WebSocketLogger(self))
 
     def set_rudder_angle(self, angle):
         try:
             rudder_sock.send(str(angle).encode('utf-8'))
         except socket.error:
             # Broken Pipe Error
-            logging.error('The rudder socket is broken!')
+            logger.error('The rudder socket is broken!')
 
     def set_winch_angle(self, angle):
         try:
             winch_sock.send(str(angle).encode('utf-8'))
         except socket.error:
             # Broken Pipe Error
-            logging.error('The winch socket is broken!')
+            logger.error('The winch socket is broken!')
 
     def send_data(self, data):
 
@@ -63,7 +65,7 @@ class DataThread(StoppableThread):
 
     def run(self):
         
-        logging.info('Starting the data thread!')
+        logger.info('Starting the data thread!')
         
         # Connect to the GPS socket
         try:
@@ -71,14 +73,14 @@ class DataThread(StoppableThread):
             gps_sock.connect(("localhost", 8907))
         except socket.error:
             # Connection refused error
-            logging.critical("Could not connect to GPS socket")
+            logger.critical("Could not connect to GPS socket")
 
         # Connect to the wind sensor socket
         try:
             wind_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             wind_sock.connect(("localhost", 8894))
         except socket.error:
-            logging.critical("Could not connect to wind sensor socket")
+            logger.critical("Could not connect to wind sensor socket")
         
         while True:
 
@@ -99,7 +101,7 @@ class DataThread(StoppableThread):
                 self._kwargs['data']['location'] = Location(gps_parsed['latitude'], gps_parsed['longitude'])
                 
             except (AttributeError, ValueError, socket.error) as e:
-                logging.error('The GPS socket is broken or sent malformed data!')
+                logger.error('The GPS socket is broken or sent malformed data!')
  
             # Query and update the wind sensor data
             try:
@@ -108,11 +110,11 @@ class DataThread(StoppableThread):
                 self._kwargs['data']['wind_dir'] = wind_parsed
             except (ValueError, socket.error) as e:
                 # Broken pipe error
-                logging.error('The wind sensor socket is broken!')
+                logger.error('The wind sensor socket is broken!')
 
             # Send data to the server
             server_thread.send_data(getJSON(self._kwargs['data']))
-            logging.debug('Data sent to the server %s' % json.dumps(json.loads(getJSON(self._kwargs['data']))))
+            logger.debug('Data sent to the server %s' % json.dumps(json.loads(getJSON(self._kwargs['data']))))
 
             # Wait in the loop
             time.sleep(self._kwargs['values']['transmission_delay'])

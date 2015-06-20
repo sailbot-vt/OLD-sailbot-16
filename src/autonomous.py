@@ -1,7 +1,9 @@
 #!/usr/bin/python
-import threading, modules.calc, logging, socket, time, sys
+import threading, modules.calc, logging, socket, time, sys, curses
 from modules.data import DataThread
 from modules.logic import LogicThread
+
+logger = logging.getLogger('log')
 
 # Variables and constants
 data = {'category': 'data', 'timestamp': 0, 'location': { "latitude": 0, "longitude": 0 },
@@ -14,6 +16,7 @@ values = {'event': 'default', 'debug': False, 'port': 80, 'transmission_delay': 
           'tack_angle': 45, 'gybe_angle': 20, 'preferred_tack': 0, 'preferred_gybe': 0, 'winch_angle': 0, 'rudder_angle': 0, 'start_time': 0,
           'target_locations': [], 'boundary_locations': [], 'location_pointer': 0 }
 
+
 def main():
     try:
         threading.current_thread().setName('Main')
@@ -25,7 +28,9 @@ def main():
             
         modules.utils.setup_locations(values['target_locations'], values['boundary_locations'])
 
-        logging.info('Starting SailBOT!')
+        time.sleep(2)
+        logger.info('Starting SailBOT!')
+        time.sleep(2)
 
         data_thread = DataThread(name='Data', kwargs={'values': values, 'data': data})
         logic_thread = LogicThread(name='Logic', kwargs={'values': values, 'data': data, 'data_thread': data_thread})
@@ -39,10 +44,10 @@ def main():
             arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             arduino_sock.connect(("localhost", 7893))
         except socket.error:
-            logging.critical("Could not connect to Arduino socket")
+            logger.critical("Could not connect to Arduino socket")
             pass
 
-        time.sleep(5)
+        time.sleep(0)
 
         while True:
             try:
@@ -52,7 +57,7 @@ def main():
 
                 # If the RC controller switch is turned off, leave the main loop and kill the threads
                 if not states['switch']:
-                    logging.critical('Autonomous shutting down! Going back to manual control!')
+                    logger.critical('Autonomous shutting down! Going back to manual control!')
 
                     # Stop the threads
                     data_thread.stop()
@@ -63,17 +68,15 @@ def main():
                     logic_thread.join()
 
                     # Terminate the program
-                    logging.critical('Autonomous gracefully exited!')
+                    logger.critical('Autonomous gracefully exited!')
                     break
 
             except socket.error:
-                logging.critical("Could not connect to the Arduino socket, check your wiring!")
-
-            modules.utils.print_terminal(data, values)
-            time.sleep(0.005)
+                logger.critical("Could not connect to the Arduino socket, check your wiring!")
+            time.sleep(1)
 
     except KeyboardInterrupt:
-        logging.critical('Program terminating!')
+        logger.critical('Program terminating!')
         # Stop the threads
         data_thread.stop()
         logic_thread.stop()
@@ -82,10 +85,14 @@ def main():
         data_thread.join()
         logic_thread.join()
 
+        # Triggers Curses to stop
+        modules.utils.shutdown_terminal()
+
         # Terminate the program
-        logging.critical('Program exited!')
+        logger.critical('Program exited!')
         sys.exit()
 
 if __name__ == '__main__':
     main()
+
             

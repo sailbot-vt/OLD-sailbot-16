@@ -2,6 +2,7 @@
 import threading, modules.calc, logging, socket, time, sys, curses
 from modules.data import DataThread
 from modules.logic import LogicThread
+from modules.utils import SocketType, socket_connect
 
 logger = logging.getLogger('log')
 
@@ -21,11 +22,6 @@ def main():
     try:
         threading.current_thread().setName('Main')
 
-        # Sets up the program configuration
-        modules.utils.setup_config(values)
-        if values['debug']:
-            modules.utils.setup_logging()
-            
         modules.utils.setup_locations(values['target_locations'], values['boundary_locations'])
 
         time.sleep(2)
@@ -34,20 +30,10 @@ def main():
 
         data_thread = DataThread(name='Data', kwargs={'values': values, 'data': data})
         logic_thread = LogicThread(name='Logic', kwargs={'values': values, 'data': data, 'data_thread': data_thread})
-
-        # Start the threads
         data_thread.start()
         logic_thread.start()
 
-        # Create the Arduino socket
-        try:
-            arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            arduino_sock.connect(("localhost", 7893))
-        except socket.error:
-            logger.critical("Could not connect to Arduino socket")
-            pass
-
-        time.sleep(0)
+        arduino_sock = socket_connect(SocketType.arduino)
 
         while True:
             try:
@@ -93,6 +79,9 @@ def main():
         sys.exit()
 
 if __name__ == '__main__':
+    modules.utils.setup_config(values)
+    if values['debug']:
+        modules.utils.setup_logging()
+        modules.utils.setup_terminal_logging()
+    logger.debug('Starting autonomous methods as a standalone program!')
     main()
-
-            

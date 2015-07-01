@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import json, logging, configparser, modules.calc, time, os, sys, modules.log
-import logging, curses, time
+import logging, curses, time, socket
 from datetime import datetime
 
 logger = logging.getLogger('log')
@@ -97,3 +97,21 @@ def setup_config(values):
     except configparser.NoOptionError:
         print('The locations configuration file could not be found or is malformed!')
 
+
+from enum import Enum
+class SocketType(Enum):
+    arduino = 7893
+    rudder = 9107
+    winch = 9108
+    gps = 8907
+    wind = 8894
+
+def socket_connect(type):
+    try:
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        connection.connect(("localhost", type.value))
+    except socket.error:
+        logger.error("Could not connect to %s socket" % type.name)
+        pass
+    finally:
+        return connection

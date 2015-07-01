@@ -5,6 +5,7 @@ from .log import WebSocketLogger
 from .utils import getJSON
 from .control_thread import StoppableThread
 from .server import ServerThread
+from .utils import SocketType, socket_connect
 
 logger = logging.getLogger('log')
 
@@ -22,73 +23,45 @@ class DataThread(StoppableThread):
         server_thread.start()
 
         global rudder_sock
-        try:
-            rudder_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            rudder_sock.connect(("localhost", 9107))
-        except socket.error:
-            # Connection refused error
-            logger.critical("Could not connect to servo socket")
+        rudder_sock = socket_connect(SocketType.rudder)
 
         global winch_sock
-        try:
-            winch_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            winch_sock.connect(("localhost", 9108))
-        except socket.error:
-            # Connection refused error
-            logger.critical("Could not connect to servo socket")
+        winch_sock = socket_connect(SocketType.winch)
 
 
-        # Set up logging to the web server console
-        # logging.getLogger('log').addHandler(WebSocketLogger(self))
-
-    def set_rudder_angle(self, angle):
+    def set_angle(self, connection, angle):
         try:
             rudder_sock.send(str(angle).encode('utf-8'))
         except socket.error:
             # Broken Pipe Error
-            logger.error('The rudder socket is broken!')
+            logger.error('The servo socket is broken!')
+
+    def set_rudder_angle(self, angle):
+        self.set_angle(rudder_sock, angle)
 
     def set_winch_angle(self, angle):
-        try:
-            winch_sock.send(str(angle).encode('utf-8'))
-        except socket.error:
-            # Broken Pipe Error
-            logger.error('The winch socket is broken!')
+        self.set_angle(winch_sock, angle)
 
     def send_data(self, data):
-
-        # do not log any data here, doing so would create an infinite loop
         try:
             server_thread.send_data(self._kwargs['data'])
         except tornado.websocket.WebSocketClosedError:
             print('Could not send data because the socket is closed.')
 
     def run(self):
-        
-        logger.info('Starting the data thread!')
-        
-        # Connect to the GPS socket
-        try:
-            gps_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            gps_sock.connect(("localhost", 8907))
-        except socket.error:
-            # Connection refused error
-            logger.critical("Could not connect to GPS socket")
 
-        # Connect to the wind sensor socket
-        try:
-            wind_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            wind_sock.connect(("localhost", 8894))
-        except socket.error:
-            logger.critical("Could not connect to wind sensor socket")
-        
+        logger.info('Starting the data thread!')
+
+        gps_sock = socket_connect(SocketType.gps)
+        wind_sock = socket_connect(SocketType.wind)
+
         while True:
 
             if self.stopped():
                 # Stop the server thread
                 server_thread.stop()
                 break
-            
+
             # Query and update the GPS data
             try:
                 gps_sock.send(str(0).encode('utf-8'))
@@ -99,10 +72,10 @@ class DataThread(StoppableThread):
 
                 # Add the location as an embeded data structure
                 self._kwargs['data']['location'] = Location(gps_parsed['latitude'], gps_parsed['longitude'])
-                
+
             except (AttributeError, ValueError, socket.error) as e:
                 logger.error('The GPS socket is broken or sent malformed data!')
- 
+
             # Query and update the wind sensor data
             try:
                 wind_sock.send(str(0).encode('utf-8'))
@@ -118,4 +91,3 @@ class DataThread(StoppableThread):
 
             # Wait in the loop
             time.sleep(self._kwargs['values']['transmission_delay'])
-

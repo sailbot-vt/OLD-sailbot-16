@@ -1,80 +1,79 @@
 #!/usr/bin/python
-import json, logging, configparser, modules.calc, time, os, sys
-from modules.location import Location
+import json, logging, configparser, modules.calc, time, os, sys, modules.log
+import logging, curses, time, socket
 from datetime import datetime
+
+logger = logging.getLogger('log')
+
+def setup_logging():
+    logger.setLevel(logging.DEBUG)
+
+    log_path = r'logs/'
+    if not os.path.exists(log_path): os.makedirs(log_path)
+
+    file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '.log')
+    file_handler.setLevel(logging.DEBUG)
+
+    formatterDisplay = logging.Formatter('[%(asctime)s] %(levelname)-0s: %(message)s', '%H:%M:%S')
+    file_handler.setFormatter(formatterDisplay)
+
+    logger.addHandler(file_handler)
+
+def setup_terminal_logging():
+    screen = curses.initscr()
+    screen.nodelay(1)
+    screen.border(0)
+
+    maxy, maxx = screen.getmaxyx()
+
+    height = 20
+    # height, width, begin_y, begin_x
+    window = curses.newwin(height, maxx-4, maxy-(height + 1), 2)
+
+    curses.setsyx(-1, -1)
+    screen.addstr(1,2, "SailBOT")
+    screen.refresh()
+    window.refresh()
+    window.scrollok(True)
+    window.idlok(True)
+    window.leaveok(True)
+
+    terminal_handler = modules.log.CursesHandler(window)
+    formatterDisplay = logging.Formatter('[%(asctime)s] %(levelname)-0s: %(message)s', '%H:%M:%S')
+    terminal_handler.setFormatter(formatterDisplay)
+    logger.addHandler(terminal_handler)
+
+def shutdown_terminal():
+    curses.curs_set(1)
+    curses.nocbreak()
+    curses.echo()
+    curses.endwin()
 
 def getJSON(obj):
     return json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-
-def location_decoder(obj):
-    return Location(obj['latitude'], obj['longitude'])
 
 def setup_locations(target_locations, boundary_locations):
     try:
         with open('locations.json', 'r') as myfile:
             json_data = json.loads(myfile.read().replace('\n', ''))
 
-        i = []
-        j = []
-        
+
         for location in json_data['target_locations']:
-            target_locations.append(location_decoder(location))
-            i.append(location_decoder(location).__str__())
+            target_locations.append({"latitude": location["latitude"], "longitude": location["longitude"]})
         for location in json_data['boundary_locations']:
-            boundary_locations.append(location_decoder(location))
-            j.append(location_decoder(location).__str__())
-            
-        logging.info("Loaded the following target locations: %s" % i)
-        logging.info("Loaded the following boundary locations: %s" % j)
-        
+            boundary_locations.append({"latitude": location["latitude"], "longitude": location["longitude"]})
+
+        logger.info("Loaded the following target locations: %s" % target_locations)
+        logger.info("Loaded the following boundary locations: %s" % boundary_locations)
+
     except IOError:
-        logging.error('The locations JSON file could not be found!')
+        logger.error('The locations JSON file could not be found!')
         sys.exit()
     except ValueError:
-        logging.error('The locations JSON file is malformed!')
+        logger.error('The locations JSON file is malformed!')
         sys.exit()
 
-yellow = "\033[33m\033[1m"
-green = "\033[32m\033[1m"
-purple = "\033[35m\033[1m"
-reset = "\033[0m\033[39m"
-
-def print_terminal(data, values):
-    print('\033c')
-    print('%sTimestamp: %s' % (yellow, data['timestamp']))
-    print('Location: %s%s' % (data['location'], reset))
-    print('Heading: %0.5f' % data['heading'])
-    print('Speed: %0.5f' % data['speed'])
-    print('Wind Direction: %0.5f\n' % data['wind_dir'])
-    print('Roll: %0.5f' % data['roll'])
-    print('Pitch: %0.5f' % data['pitch'])
-    print('Yaw: %0.5f\n' % data['yaw'])
-
-    print('%sEvent: %s' % (green, values['event']))
-    print('Debug: %r%s' % (values['debug'], reset))
-    print('Web server port: %d\n' % values['port'])
-    print('Transmission delay: %d' % values['transmission_delay'])
-    print('Logic evaluation delay: %d\n' % values['eval_delay'])
-    print('%sCurrent desired heading: %d' % (purple, values['current_desired_heading']))
-    print('Direction: %d' % values['direction'])
-    print('Absolute wind direction: %d%s\n' % (values['absolute_wind_direction'], reset))
-    # print('Max turn rate angle: %d' % values['max_turn_rate_angle'])
-    # print('Max rudder angle: %d' % values['max_rudder_angle'])
-    # print('Max winch angle: %d\n' % values['max_winch_angle'])
-    print('Preferred tack: %d' % values['preferred_tack'])
-    print('Preferred gybe: %d\n' % values['preferred_gybe'])
-    print('Winch angle: %d\n' % values['winch_angle'])
-    print('Rudder angle: %d\n' % values['rudder_angle'])
-    # print('Tack angle: %d' % values['tack_angle'])
-    # print('Gybe angle: %d\n\n' % values['gybe_angle'])
-
-    time.sleep(0.995)
-
 def setup_config(values):
-
-    # Logging in this method must stay as print statements because the logger
-    # has not been defined yet
-
     try:
         config = configparser.ConfigParser()
         config.read('config.ini')
@@ -106,19 +105,21 @@ def setup_config(values):
     except configparser.NoOptionError:
         print('The locations configuration file could not be found or is malformed!')
 
-def setup_logging():
 
-    log_format = '[%(asctime)s] %(threadName)-7s %(levelname)-0s: %(message)s'
+from enum import Enum
+class SocketType(Enum):
+    arduino = 7893
+    rudder = 9107
+    winch = 9108
+    gps = 8907
+    wind = 8894
 
-    log_path = r'logs/' 
-    if not os.path.exists(log_path): os.makedirs(log_path)
-
-    logging.basicConfig(filename='logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '.log', format=log_format,
-                        datefmt='%H:%M:%S', level=logging.DEBUG)
-
-    # Add the console to the logging output
-    root = logging.StreamHandler()
-    root.setFormatter(logging.Formatter(log_format, '%H:%M:%S'))
-    logging.getLogger().addHandler(root)
-
-    logging.info('Log started on: %s' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+def socket_connect(type):
+    try:
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        connection.connect(("localhost", type.value))
+    except socket.error:
+        logger.error("Could not connect to %s socket" % type.name)
+        pass
+    finally:
+        return connection

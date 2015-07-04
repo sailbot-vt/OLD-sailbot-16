@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import logging, modules.utils
+import logging, modules.utils, curses
 
 class WebSocketLogger(logging.Handler):
 
@@ -21,26 +21,46 @@ class WebSocketLogger(logging.Handler):
             print('The server thread has not been created yet. Dropping log output.')
         except:
             self.handleError(record)
+
+class CursesHandler(logging.Handler):
+    def __init__(self, screen):
+        logging.Handler.__init__(self)
+        self.screen = screen
+
+        curses.start_color()
+        curses.use_default_colors()
+        for i in range(0, curses.COLORS):
+            curses.init_pair(i + 1, i, -1)
+
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            screen = self.screen
+            fs = "\n%s"
             
-class ConsoleFormatter(logging.Formatter):
-    def format(self, record):
-        if record.levelno  == logging.WARNING:
-            # display yellow text
-            record.msg = '\033[93m\033[1m%s\033[0m\033[39m' % (record.msg)
-        elif record.levelno == logging.ERROR:
-            # display red text
-            record.msg = '\033[31m\033[1m%s\033[0m\033[39m' % (record.msg)
-        elif record.levelno == logging.INFO:
-            # display blue text
-            record.msg = '\033[94m\033[1m%s\033[0m\033[39m' % (record.msg)
-        elif record.levelno == logging.CRITICAL:
-            # display bold red text
-            record.msg = '\033[31m\033[1m%s\033[0m\033[39m' % (record.msg)
-        elif record.levelno == logging.DEBUG:
-            # display green text
-            record.msg = '\033[92m\033[1m%s\033[0m\033[39m' % (record.msg)
-            
-        return super(ConsoleFormatter , self).format(record)
+            try:
+
+                ufs = u'\n%s'
+                try:
+                    screen.addstr(ufs % msg, self.get_color_pair(record.levelno))
+                    screen.refresh()
+                except UnicodeEncodeError:
+                    screen.addstr((ufs % msg).encode(code))
+                    screen.refresh()
+
+            except UnicodeError:
+                screen.addstr(fs % msg.encode("UTF-8"))
+                screen.refresh()
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+
+    def get_color_pair(self, level):
+        index = str(level)
+        #20 : 28
+        return curses.color_pair({'10': 83, '20': 39, '30':  245, '40': 167, '50': 197}[index])
 
 
         

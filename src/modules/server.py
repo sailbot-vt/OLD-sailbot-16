@@ -44,14 +44,11 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 
 class IndexHandler(tornado.web.RequestHandler):
-
     @tornado.web.asynchronous
     def get(self):
         self.render('../web/index.html')
 
-
 class Application(tornado.web.Application):
-
     def __init__(self):
         handlers = [(r'/ws', WSHandler), (r'/', IndexHandler)]
         settings = {'debug': True,
@@ -62,15 +59,9 @@ class Application(tornado.web.Application):
 application = Application()
 
 class ServerThread(StoppableThread):
-
-    """ Creates thread which runs the web socket server
-    """
-
     def send_data(self, message):
         for ws in wss:
-
-            # do not log any data here, doing so would create an infinite loop
-
+            # Do not log any data here, doing so would create an infinite loop
             try:
                 ws.write_message(message)
                 break
@@ -84,10 +75,10 @@ class ServerThread(StoppableThread):
 
     def run(self):
         global target_locations, boundary_locations
-        
+
         logger.info('Starting server.')
-        
-        # defining the locations array
+
+        # Defining the locations array
         target_locations = self._kwargs['target_locations']
         boundary_locations = self._kwargs['boundary_locations']
 
@@ -112,12 +103,8 @@ class ServerThread(StoppableThread):
             logger.info('The web server successfully bound to port %d'
                          % self._kwargs['port'])
 
-            # starts the main IO loop
+            # Starts the main IO loop
             main_loop.start()
-            
+
         except OSError:
             logger.critical('The web server failed to bind to the port!')
-
-
-
-

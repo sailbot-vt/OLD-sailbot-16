@@ -1,13 +1,14 @@
 #!/usr/bin/python
 import time, logging, sys
+from utils import setup_logging
 
-def generate_error(message):
-    print '\033[31m\033[1m%s\033[0m\033[39m' % message
-    
+logger = logging.getLogger('log')
+setup_logging()
+
 try:
     import smbus
 except ImportError:
-    generate_error('[Arduino Socket]: SMBUS not configured properly!')
+    logger.critical('[Arduino Socket]: SMBUS not configured properly!')
     sys.exit(1)
 
 import threading
@@ -27,17 +28,17 @@ HOST = ''
 PORT = 7893
 
 connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
+connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 # Bind socket to local host and port
 try:
     connection.bind((HOST, PORT))
 except socket.error, msg:
-    generate_error('[Arduino Socket]: Bind failed. Error Code: ' + str(msg[0]) + ' Message ' \
+    logger.critical('[Arduino Socket]: Bind failed. Error Code: ' + str(msg[0]) + ' Message ' \
         + msg[1])
     sys.exit()
 
-print '[Arduino Socket]: Socket bind complete!'
+logger.debug('[Arduino Socket]: Socket bind complete!')
 
 
 class ArduinoDevice(threading.Thread):
@@ -90,7 +91,7 @@ class ArduinoDevice(threading.Thread):
                 time.sleep(0.1)
 
         except IOError:
-            generate_error('[Arduino Socket]: IO Error: device cannot be read, check your wiring or run as root')
+            logger.critical('[Arduino Socket]: IO Error: device cannot be read, check your wiring or run as root')
 
 # Create and start the wind_sensor thread
 arduino_device = ArduinoDevice()
@@ -125,7 +126,7 @@ while True:
     try:
         # Wait to accept a connection in a blocking call
         (conn, addr) = connection.accept()
-        print '[Arduino Socket]: Connected with ' + addr[0] + ':' + str(addr[1])
+        logger.debug('[Arduino Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
 
         # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
         start_new_thread(clientthread, (conn, ))
@@ -134,6 +135,3 @@ while True:
         connection.shutdown(socket.SHUT_RDWR)
         connection.close()
         break
-
-
-            

@@ -1,13 +1,14 @@
 #!/usr/bin/python
 import time, logging, sys
+from utils import setup_logging
 
-def generate_error(message):
-    print '\033[31m\033[1m%s\033[0m\033[39m' % message
-    
+logger = logging.getLogger('log')
+setup_logging()
+
 try:
     import smbus
 except ImportError:
-    generate_error('[Wind Sensor Socket]: SMBUS not configured properly!')
+    logger.critical('[Wind Sensor Socket]: SMBUS not configured properly!')
     sys.exit(1)
 
 import threading
@@ -16,7 +17,6 @@ from thread import *
 import time
 import json
 import threading
-
 
 wind_sensor = None  # Global wind_sensor variable
 angle = 0.0
@@ -27,17 +27,17 @@ HOST = ''
 PORT = 8894
 
 connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
+connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 # Bind socket to local host and port
 try:
     connection.bind((HOST, PORT))
 except socket.error, msg:
-    generate_error('[Wind Sensor Socket]: Bind failed. Error Code: ' + str(msg[0]) + ' Message ' \
+    logger.critical('[Wind Sensor Socket]: Bind failed. Error Code: ' + str(msg[0]) + ' Message ' \
         + msg[1])
     sys.exit()
 
-print '[Wind Sensor Socket]: Socket bind complete!'
+logger.debug('[Wind Sensor Socket]: Socket bind complete!')
 
 
 class WindSensor(threading.Thread):
@@ -49,32 +49,28 @@ class WindSensor(threading.Thread):
     max = 1200.0
     min = 200.0
 
+    # Flips the bits of the input and returns the result
     def switch_bits(self, input):
-
-        # Flips the bits of the input and returns the result
         return (input >> 8) + ((input & 0x00ff) << 8)
 
     def set_data_channel(self, input, bus):
         bus.write_word_data(self.address, 0x01, 0x1C40)
         time.sleep(0.01)
 
+    # Read data from the bus
     def read_data(self, bus):
-
-        # Read data from the bus
         time.sleep(0.01)
         return self.switch_bits(bus.read_word_data(self.address, 0)) >> 4
 
+    # Write values to the registers
     def setup(self, input, bus):
-
-        # Write values to the registers
         bus.write_word_data(self.address, 0x02, self.switch_bits(input << 4))
         time.sleep(0.01)
         bus.write_word_data(self.address, 0x03, self.switch_bits(0x7fff))
         time.sleep(0.01)
 
+    # Alter the maximum and minimum values during calibration
     def calculate_angle(self, input):
-
-        # Alter the maximum and minimum values during calibration
         if input > self.max:
             self.max = input
 
@@ -89,7 +85,7 @@ class WindSensor(threading.Thread):
     def run(self):
         global angle  # Bring the angle into scope
 
-        generate_error('[Wind Sensor Socket]: Remember to calibrate the wind sensor before use!')
+        logger.warn('[Wind Sensor Socket]: Remember to calibrate the wind sensor before use!')
 
         try:
             bus = smbus.SMBus(0x01)
@@ -100,7 +96,7 @@ class WindSensor(threading.Thread):
                 angle = self.calculate_angle(self.read_data(bus))
                 time.sleep(0.1)
         except IOError:
-            generate_error('[Wind Sensor Socket]: IO Error: device cannot be read, check your wiring or run as root')
+            logger.critical('[Wind Sensor Socket]: IO Error: device cannot be read, check your wiring or run as root')
 
 # Create and start the wind_sensor thread
 wind_sensor = WindSensor()
@@ -125,7 +121,7 @@ def clientthread(conn):
 
         conn.sendall(json.dumps(angle).encode('utf-8'))
 
-    # close the connection if the client if the client and server connection is interfered
+    # Close the connection if the client if the client and server connection is interfered
     conn.close()
 
 
@@ -135,7 +131,7 @@ while True:
     try:
         # Wait to accept a connection in a blocking call
         (conn, addr) = connection.accept()
-        print '[Wind Sensor Socket]: Connected with ' + addr[0] + ':' + str(addr[1])
+        logger.debug('[Wind Sensor Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
 
         # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
         start_new_thread(clientthread, (conn, ))
@@ -144,6 +140,3 @@ while True:
         connection.shutdown(socket.SHUT_RDWR)
         connection.close()
         break
-
-
-            

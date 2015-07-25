@@ -1,6 +1,4 @@
 #!/usr/bin/python
-import time, logging, sys
-from utils import setup_logging
 
 logger = logging.getLogger('log')
 setup_logging()
@@ -11,12 +9,8 @@ except ImportError:
     logger.critical('[Wind Sensor Socket]: SMBUS not configured properly!')
     sys.exit(1)
 
-import threading
-import socket
+import time, logging, sys, socket, json, threading
 from thread import *
-import time
-import json
-import threading
 
 wind_sensor = None  # Global wind_sensor variable
 angle = 0.0

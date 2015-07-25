@@ -1,7 +1,11 @@
 #!/usr/bin/python
-import json, logging, configparser, modules.calc, time, os, sys, modules.log
-import logging, curses, time, socket
-from datetime import datetime
+try:
+    import json, logging, configparser, modules.calc, time, os, sys, modules.log
+    import logging, curses, time, socket
+    from datetime import datetime
+except:
+    import os, time
+    pass
 
 logger = logging.getLogger('log')
 

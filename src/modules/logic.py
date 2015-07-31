@@ -18,7 +18,6 @@ class LogicThread(StoppableThread):
         global values
         values = self._kwargs['values']
 
-
     def station_keeping(self):
         time_elapsed = time.time() - values['start_time']
 
@@ -29,7 +28,6 @@ class LogicThread(StoppableThread):
             for i in range(len(target_locations)):
                     target_locations[i] = Location(0, 0)
             logger.warn("Switched targets!")
-
 
     def run(self):
         logger.info("Beginning autonomous navigation routines...")
@@ -148,7 +146,6 @@ class LogicThread(StoppableThread):
 
         logger.debug('Set the rudder angle to: %f' % values['rudder_angle'])
         self._kwargs['data_thread'].set_rudder_angle(values['rudder_angle'])
-
 
     def turn_winch(self):
         a = data['wind_dir']

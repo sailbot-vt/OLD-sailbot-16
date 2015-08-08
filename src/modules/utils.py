@@ -15,7 +15,11 @@ def setup_logging():
     log_path = r'logs/'
     if not os.path.exists(log_path): os.makedirs(log_path)
 
-    file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '.log')
+    if ('name' in keyword_parameters):
+        file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '/' + keyword_parameters['name'] + '.log')
+    else:
+        file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '/' + "undefined" + '.log')
+
     file_handler.setLevel(logging.DEBUG)
 
     formatterDisplay = logging.Formatter('[%(asctime)s] %(levelname)-0s: %(message)s', '%H:%M:%S')

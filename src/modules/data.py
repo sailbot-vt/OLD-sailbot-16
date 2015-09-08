@@ -6,88 +6,71 @@ from .utils import getJSON
 from .control_thread import StoppableThread
 from .server import ServerThread
 from .utils import SocketType, socket_connect
+from contextlib import contextmanager
 
 logger = logging.getLogger('log')
 
+@contextmanager
+def query(socket):
+    try:
+        socket.send(str(0).encode('utf-8'))
+        parsed = json.loads(socket.recv(256).decode('utf-8').strip('\x00'))
+        yield parsed
+    except (AttributeError, ValueError, BrokenPipeError) as e:
+        logger.error("A socket is broken!")
+        yield ''
+
 class DataThread(StoppableThread):
 
-    server_thread = None
-    rudder_sock = None
-    winch_sock = None
+    server_thread = rudder_sock = winch_sock = None
 
     def __init__(self, *args, **kwargs):
         super(DataThread, self).__init__(*args, **kwargs)
+        global server_thread, rudder_sock, winch_sock
 
-        global server_thread
-        server_thread = ServerThread(name='Server', kwargs={'port': self._kwargs['values']['port'], 'target_locations': self._kwargs['values']['target_locations'], 'boundary_locations': self._kwargs['values']['boundary_locations']})
+        server_thread = ServerThread(
+            name = 'Server',
+            kwargs = {
+                'port': self._kwargs['values']['port'],
+                'target_locations': self._kwargs['values']['target_locations'],
+                'boundary_locations': self._kwargs['values']['boundary_locations']
+                }
+            )
+
         server_thread.start()
-
-        global rudder_sock
         rudder_sock = socket_connect(SocketType.rudder)
-
-        global winch_sock
         winch_sock = socket_connect(SocketType.winch)
 
-
-    def set_angle(self, connection, angle):
+    def set_angle(self, angle, socket_type):
         try:
-            rudder_sock.send(str(angle).encode('utf-8'))
+            if socket_type == SocketType.rudder:
+                rudder_sock.send(str(angle).encode('utf-8'))
+            elif socket_type == SocketType.winch:
+                winch_sock.send(str(angle).encode('utf-8'))
         except socket.error:
-            # Broken Pipe Error
-            logger.error('The servo socket is broken!')
-
-    def set_rudder_angle(self, angle):
-        self.set_angle(rudder_sock, angle)
-
-    def set_winch_angle(self, angle):
-        self.set_angle(winch_sock, angle)
-
-    def send_data(self, data):
-        try:
-            server_thread.send_data(self._kwargs['data'])
-        except tornado.websocket.WebSocketClosedError:
-            print('Could not send data because the socket is closed.')
+            logger.error('A servo socket is broken!')
 
     def run(self):
-
         logger.info('Starting the data thread!')
 
         gps_sock = socket_connect(SocketType.gps)
         wind_sock = socket_connect(SocketType.wind)
+        data = self._kwargs['data']
 
         while True:
-
             if self.stopped():
-                # Stop the server thread
                 server_thread.stop()
                 break
 
-            # Query and update the GPS data
-            try:
-                gps_sock.send(str(0).encode('utf-8'))
-                gps_parsed = json.loads(gps_sock.recv(256).decode('utf-8').strip('\x00'))
+            with query(gps_sock) as parsed:
+                data.update(parsed)
+                if all (k in parsed for k in ('latitude', 'longitude')):
+                    data['location'] = {'latitude': parsed['latitude'], 'longitude': parsed['longitude']}
 
-                # Update the data object
-                self._kwargs['data'].update(gps_parsed)
+            with query(wind_sock) as parsed:
+                if not parsed == '':
+                    data['wind_dir'] = parsed
 
-                # Add the location as an embeded data structure
-                self._kwargs['data']['location'] = Location(gps_parsed['latitude'], gps_parsed['longitude'])
-
-            except (AttributeError, ValueError, socket.error) as e:
-                logger.error('The GPS socket is broken or sent malformed data!')
-
-            # Query and update the wind sensor data
-            try:
-                wind_sock.send(str(0).encode('utf-8'))
-                wind_parsed = json.loads(wind_sock.recv(1024).decode('utf-8'))
-                self._kwargs['data']['wind_dir'] = wind_parsed
-            except (ValueError, socket.error) as e:
-                # Broken pipe error
-                logger.error('The wind sensor socket is broken!')
-
-            # Send data to the server
-            server_thread.send_data(getJSON(self._kwargs['data']))
-            logger.debug('Data sent to the server %s' % json.dumps(json.loads(getJSON(self._kwargs['data']))))
-
-            # Wait in the loop
+            server_thread.send_data(getJSON(data))
+            logger.debug('Data sent to the server %s' % json.dumps(json.loads(getJSON(data))))
             time.sleep(self._kwargs['values']['transmission_delay'])

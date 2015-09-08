@@ -7,7 +7,7 @@ class WebSocketLogger(logging.Handler):
     A handler class which allows the cursor to stay on
     one line for selected messages
     """
-    
+
     def __init__(self, listener):
         super().__init__()
         self.listener = listener
@@ -31,7 +31,6 @@ class CursesHandler(logging.Handler):
         curses.use_default_colors()
         for i in range(0, curses.COLORS):
             curses.init_pair(i + 1, i, -1)
-
 
     def emit(self, record):
         try:
@@ -61,6 +60,3 @@ class CursesHandler(logging.Handler):
         index = str(level)
         #20 : 28
         return curses.color_pair({'10': 83, '20': 39, '30':  245, '40': 167, '50': 197}[index])
-
-
-        

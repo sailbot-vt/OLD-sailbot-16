@@ -1,17 +1,25 @@
 #!/usr/bin/python
-import json, logging, configparser, modules.calc, time, os, sys, modules.log
-import logging, curses, time, socket
-from datetime import datetime
+try:
+    import json, logging, configparser, modules.calc, time, os, sys, modules.log
+    import logging, curses, time, socket
+    from datetime import datetime
+except:
+    import os, time
+    pass
 
 logger = logging.getLogger('log')
 
-def setup_logging():
+def setup_logging(*positional_parameters, **keyword_parameters):
     logger.setLevel(logging.DEBUG)
 
-    log_path = r'logs/'
+    log_path = r'logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '/'
     if not os.path.exists(log_path): os.makedirs(log_path)
 
-    file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '.log')
+    if ('name' in keyword_parameters):
+        file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '/' + keyword_parameters['name'] + '.log')
+    else:
+        file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '/' + "undefined" + '.log')
+
     file_handler.setLevel(logging.DEBUG)
 
     formatterDisplay = logging.Formatter('[%(asctime)s] %(levelname)-0s: %(message)s', '%H:%M:%S')
@@ -19,7 +27,10 @@ def setup_logging():
 
     logger.addHandler(file_handler)
 
+panel = None
 def setup_terminal_logging():
+    logger.setLevel(logging.DEBUG)
+    global panel
     screen = curses.initscr()
     screen.nodelay(1)
     screen.border(0)
@@ -30,8 +41,11 @@ def setup_terminal_logging():
     # height, width, begin_y, begin_x
     window = curses.newwin(height, maxx-4, maxy-(height + 1), 2)
 
+    panel = curses.newwin(25, maxx-4, 2, 2)
+    panel.refresh()
+
     curses.setsyx(-1, -1)
-    screen.addstr(1,2, "SailBOT")
+
     screen.refresh()
     window.refresh()
     window.scrollok(True)
@@ -42,6 +56,20 @@ def setup_terminal_logging():
     formatterDisplay = logging.Formatter('[%(asctime)s] %(levelname)-0s: %(message)s', '%H:%M:%S')
     terminal_handler.setFormatter(formatterDisplay)
     logger.addHandler(terminal_handler)
+
+def update_terminal_display(data, values):
+    global panel
+
+    panel.addstr(0, 0, "SailBOT Terminal Display", curses.A_BOLD)
+    panel.addstr(2, 0, "location: " + str(data['location']))
+    panel.refresh()
+
+    for k, j in enumerate([data, values]):
+        for index, (key, value) in enumerate(j.items()):
+            if "location" in key:
+                continue
+            panel.addstr(index + 4, k * 45, str(key) + ": " + str(value))
+            panel.refresh()
 
 def shutdown_terminal():
     curses.curs_set(1)
@@ -56,7 +84,6 @@ def setup_locations(target_locations, boundary_locations):
     try:
         with open('locations.json', 'r') as myfile:
             json_data = json.loads(myfile.read().replace('\n', ''))
-
 
         for location in json_data['target_locations']:
             target_locations.append({"latitude": location["latitude"], "longitude": location["longitude"]})

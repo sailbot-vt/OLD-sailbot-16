@@ -5,17 +5,10 @@ from modules.control_thread import StoppableThread
 
 logger = logging.getLogger('log')
 
-wss = []
-
-target_locations = []
-boundary_locations = []
-http_server = None
-main_loop = None
+wss = target_locations = boundary_locations = []
+http_server = main_loop = None
 
 class WSHandler(tornado.websocket.WebSocketHandler):
-
-    """ Creates the web socket server
-    """
 
     def check_origin(self, origin):
         return True
@@ -38,39 +31,32 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         logger.info('Received message: %s' % message)
 
     def on_close(self):
-        logger.info('Connection closed.')
+        logger.info('Connection closed')
         if self in wss:
             wss.remove(self)
 
 
 class IndexHandler(tornado.web.RequestHandler):
-
     @tornado.web.asynchronous
     def get(self):
         self.render('../web/index.html')
 
-
 class Application(tornado.web.Application):
-
     def __init__(self):
         handlers = [(r'/ws', WSHandler), (r'/', IndexHandler)]
-        settings = {'debug': True,
-                    'static_path': os.path.join(os.path.dirname(__file__),
-                    '../web')}
+        settings = {
+            'debug': True,
+            'static_path': os.path.join(os.path.dirname(__file__),
+            '../web')
+        }
         tornado.web.Application.__init__(self, handlers, **settings)
 
 application = Application()
 
 class ServerThread(StoppableThread):
-
-    """ Creates thread which runs the web socket server
-    """
-
     def send_data(self, message):
         for ws in wss:
-
-            # do not log any data here, doing so would create an infinite loop
-
+            # Do not log any data here, doing so would create an infinite loop
             try:
                 ws.write_message(message)
                 break
@@ -78,16 +64,16 @@ class ServerThread(StoppableThread):
                 logger.error('Tried to send invalid value.')
 
     def close_sockets(self):
-        logger.info('Closing all connections....')
+        logger.info('Closing all connections...')
         for ws in wss:
             ws.close()
 
     def run(self):
         global target_locations, boundary_locations
-        
-        logger.info('Starting server.')
-        
-        # defining the locations array
+
+        logger.info('Starting server')
+
+        # Defining the locations array
         target_locations = self._kwargs['target_locations']
         boundary_locations = self._kwargs['boundary_locations']
 
@@ -96,7 +82,6 @@ class ServerThread(StoppableThread):
 
             http_server = tornado.httpserver.HTTPServer(application)
             http_server.listen(int(self._kwargs['port']))
-
             main_loop = tornado.ioloop.IOLoop.instance()
 
             def shutdown():
@@ -106,18 +91,10 @@ class ServerThread(StoppableThread):
                     http_server.stop()
                     main_loop.stop()
 
-            scheduler = tornado.ioloop.PeriodicCallback(shutdown, 1000, io_loop = main_loop)
+            scheduler = tornado.ioloop.PeriodicCallback(shutdown, 500, io_loop = main_loop)
             scheduler.start()
-
-            logger.info('The web server successfully bound to port %d'
-                         % self._kwargs['port'])
-
-            # starts the main IO loop
+            logger.info('The web server successfully bound to port %d' % self._kwargs['port'])
             main_loop.start()
-            
+
         except OSError:
             logger.critical('The web server failed to bind to the port!')
-
-
-
-

@@ -1,23 +1,20 @@
 
 import logging, socket, time, modules.calc
 from .control_thread import StoppableThread
+from .utils import SocketType
 
 logger = logging.getLogger('log')
 
 class LogicThread(StoppableThread):
 
-    data = None
-    values = None
+    data = values = None
 
     def __init__(self, *args, **kwargs):
         super(LogicThread, self).__init__(*args, **kwargs)
 
-        global data
+        global data, values
         data = self._kwargs['data']
-
-        global values
         values = self._kwargs['values']
-
 
     def station_keeping(self):
         time_elapsed = time.time() - values['start_time']
@@ -30,7 +27,6 @@ class LogicThread(StoppableThread):
                     target_locations[i] = Location(0, 0)
             logger.warn("Switched targets!")
 
-
     def run(self):
         logger.info("Beginning autonomous navigation routines...")
         logger.warn("The angle is: %d" % data['wind_dir'])
@@ -38,7 +34,6 @@ class LogicThread(StoppableThread):
         values['start_time'] = time.time()
 
         while True:
-
             if self.stopped():
                 break
 
@@ -147,8 +142,7 @@ class LogicThread(StoppableThread):
         values['rudder_angle'] = a * (values['max_rudder_angle'] / values['max_turn_rate_angle'])
 
         logger.debug('Set the rudder angle to: %f' % values['rudder_angle'])
-        self._kwargs['data_thread'].set_rudder_angle(values['rudder_angle'])
-
+        self._kwargs['data_thread'].set_angle(values['rudder_angle'], SocketType.rudder)
 
     def turn_winch(self):
         a = data['wind_dir']
@@ -167,4 +161,4 @@ class LogicThread(StoppableThread):
         values['winch_angle'] = 80 - 40 * (a / (180 - values['gybe_angle'] - values['tack_angle']))
 
         logger.debug('Set the winch angle to: %f' % values['winch_angle'])
-        self._kwargs['data_thread'].set_winch_angle(values['winch_angle'])
+        self._kwargs['data_thread'].set_angle(values['winch_angle'], SocketType.winch)

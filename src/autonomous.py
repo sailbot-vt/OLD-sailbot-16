@@ -17,71 +17,43 @@ values = {'event': 'default', 'debug': False, 'port': 80, 'transmission_delay': 
           'tack_angle': 45, 'gybe_angle': 20, 'preferred_tack': 0, 'preferred_gybe': 0, 'winch_angle': 0, 'rudder_angle': 0, 'start_time': 0,
           'target_locations': [], 'boundary_locations': [], 'location_pointer': 0 }
 
-
 def main():
-    try:
-        threading.current_thread().setName('Main')
+    threading.current_thread().setName('Main')
 
-        modules.utils.setup_locations(values['target_locations'], values['boundary_locations'])
+    modules.utils.setup_locations(values['target_locations'], values['boundary_locations'])
+    modules.utils.spawn_processes()
 
-        time.sleep(2)
-        logger.info('Starting SailBOT!')
-        time.sleep(2)
+    time.sleep(0.5)
+    logger.info('Starting SailBOT!')
+    time.sleep(0.5)
 
-        data_thread = DataThread(name='Data', kwargs={'values': values, 'data': data})
-        logic_thread = LogicThread(name='Logic', kwargs={'values': values, 'data': data, 'data_thread': data_thread})
-        data_thread.start()
-        logic_thread.start()
+    data_thread = DataThread(name='Data', kwargs={'values': values, 'data': data})
+    logic_thread = LogicThread(name='Logic', kwargs={'values': values, 'data': data, 'data_thread': data_thread})
+    data_thread.start()
+    logic_thread.start()
 
-        arduino_sock = socket_connect(SocketType.arduino)
+    arduino_sock = socket_connect(SocketType.arduino)
 
-        while True:
-            try:
-                # Query the Arduino socket
-                arduino_sock.send(str(0).encode('utf-8'))
-                states = json.loads(arduino_sock.recv(128).decode('utf-8'))
+    while True:
+        try:
+            time.sleep(0.5)
+            modules.utils.update_terminal_display(data, values)
+        except KeyboardInterrupt:
+            logger.critical('Program terminating!')
 
-                # If the RC controller switch is turned off, leave the main loop and kill the threads
-                if not states['switch']:
-                    logger.critical('Autonomous shutting down! Going back to manual control!')
+            # Stop the threads
+            data_thread.stop()
+            logic_thread.stop()
 
-                    # Stop the threads
-                    data_thread.stop()
-                    logic_thread.stop()
+            # Join the threads into the main threads
+            data_thread.join()
+            logic_thread.join()
+            modules.utils.shutdown_terminal()
+            # Terminate the program
+            logger.critical('Autonomous gracefully exited!')
 
-                    # Join the threads into the main threads
-                    data_thread.join()
-                    logic_thread.join()
-
-                    # Terminate the program
-                    logger.critical('Autonomous gracefully exited!')
-                    break
-
-            except socket.error:
-                logger.critical("Could not connect to the Arduino socket, check your wiring!")
-            time.sleep(1)
-
-    except KeyboardInterrupt:
-        logger.critical('Program terminating!')
-        # Stop the threads
-        data_thread.stop()
-        logic_thread.stop()
-
-        # Join the threads into the main threads
-        data_thread.join()
-        logic_thread.join()
-
-        # Triggers Curses to stop
-        modules.utils.shutdown_terminal()
-
-        # Terminate the program
-        logger.critical('Program exited!')
-        sys.exit()
+            sys.exit()
 
 if __name__ == '__main__':
-    modules.utils.setup_config(values)
-    if values['debug']:
-        modules.utils.setup_logging()
-        modules.utils.setup_terminal_logging()
-    logger.debug('Starting autonomous methods as a standalone program!')
+    modules.utils.setup_terminal_logging()
     main()

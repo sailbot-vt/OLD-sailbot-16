@@ -21,7 +21,6 @@ def main():
     threading.current_thread().setName('Main')
 
     modules.utils.setup_locations(values['target_locations'], values['boundary_locations'])
-    modules.utils.spawn_processes()
 
     time.sleep(0.5)
     logger.info('Starting SailBOT!')
@@ -56,4 +55,5 @@ def main():
 
 if __name__ == '__main__':
     modules.utils.setup_terminal_logging()
+    modules.utils.setup_logging('autonomous')
     main()

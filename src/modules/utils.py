@@ -9,17 +9,13 @@ except:
 
 logger = logging.getLogger('log')
 
-def setup_logging(*positional_parameters, **keyword_parameters):
+def setup_logging(name):
     logger.setLevel(logging.DEBUG)
 
     log_path = r'logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '/'
     if not os.path.exists(log_path): os.makedirs(log_path)
 
-    if ('name' in keyword_parameters):
-        file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '/' + keyword_parameters['name'] + '.log')
-    else:
-        file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '/' + "undefined" + '.log')
-
+    file_handler = logging.FileHandler('logs/' + time.strftime("%Y-%m-%d %H-%M-%S") + '/' + name + '.log')
     file_handler.setLevel(logging.DEBUG)
 
     formatterDisplay = logging.Formatter('[%(asctime)s] %(levelname)-0s: %(message)s', '%H:%M:%S')

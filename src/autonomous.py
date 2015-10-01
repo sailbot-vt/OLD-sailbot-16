@@ -47,10 +47,12 @@ def main():
             # Join the threads into the main threads
             data_thread.join()
             logic_thread.join()
-            modules.utils.shutdown_terminal()
+
             # Terminate the program
             logger.critical('Autonomous gracefully exited!')
 
+            # Keep the terminal shutdown at the end; logging after this causes NCurses mode to switch back on
+            modules.utils.shutdown_terminal()
             sys.exit()
 
 if __name__ == '__main__':

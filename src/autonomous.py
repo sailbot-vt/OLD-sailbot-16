@@ -22,9 +22,7 @@ def main():
 
     modules.utils.setup_locations(values['target_locations'], values['boundary_locations'])
 
-    time.sleep(0.5)
     logger.info('Starting SailBOT!')
-    time.sleep(0.5)
 
     data_thread = DataThread(name='Data', kwargs={'values': values, 'data': data})
     logic_thread = LogicThread(name='Logic', kwargs={'values': values, 'data': data, 'data_thread': data_thread})

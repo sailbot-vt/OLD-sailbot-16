@@ -124,7 +124,7 @@ class WindSocket():
                 (conn, addr) = connection.accept()
                 logger.debug('[Wind Sensor Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
 
-                # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
+                # Start new thread; arguments: function name to be run, the tuple of arguments to the function
                 start_new_thread(clientthread, (conn, ))
 
             except KeyboardInterrupt, socket.error:

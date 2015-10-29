@@ -14,9 +14,7 @@ def main():
     logger.debug('Built sockets!')
 
     time.sleep(1)
-
     logger.info('Starting sail boat RC control!')
-
     time.sleep(2)
 
     # Enter the main loop

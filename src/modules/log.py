@@ -2,19 +2,17 @@
 import logging, modules.utils, curses
 
 class WebSocketLogger(logging.Handler):
-
-    """
-    A handler class which allows the cursor to stay on
-    one line for selected messages
-    """
-
     def __init__(self, listener):
         super().__init__()
         self.listener = listener
 
     def emit(self, record):
         try:
-            packet = {'category': 'log', 'message': self.format(record), 'type': record.levelno}
+            packet = {
+                'category': 'log',
+                'message': self.format(record),
+                'type': record.levelno
+            }
             self.listener.send_data(modules.utils.getJSON(packet))
             self.flush()
         except NameError:
@@ -34,23 +32,9 @@ class CursesHandler(logging.Handler):
 
     def emit(self, record):
         try:
-            msg = self.format(record)
             screen = self.screen
-            fs = "\n%s"
-            
-            try:
-
-                ufs = u'\n%s'
-                try:
-                    screen.addstr(ufs % msg, self.get_color_pair(record.levelno))
-                    screen.refresh()
-                except UnicodeEncodeError:
-                    screen.addstr((ufs % msg).encode(code))
-                    screen.refresh()
-
-            except UnicodeError:
-                screen.addstr(fs % msg.encode("UTF-8"))
-                screen.refresh()
+            screen.addstr(u'\n%s' % self.format(record), self.get_color_pair(record.levelno))
+            screen.refresh()
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -58,5 +42,10 @@ class CursesHandler(logging.Handler):
 
     def get_color_pair(self, level):
         index = str(level)
-        #20 : 28
-        return curses.color_pair({'10': 83, '20': 39, '30':  245, '40': 167, '50': 197}[index])
+        return curses.color_pair({
+            '10': 83,
+            '20': 39,
+            '30': 245,
+            '40': 167,
+            '50': 197
+        }[index])

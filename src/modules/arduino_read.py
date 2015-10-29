@@ -2,8 +2,6 @@
 import time, logging, sys
 from utils import setup_logging
 
-
-
 import threading
 import socket
 from thread import *
@@ -50,7 +48,6 @@ class ArduinoSocket():
         normal = 0x0418
 
         def switch_bits(self, input):
-
             # Flips the bits of the input and returns the result
             return (input >> 8) + ((input & 0x00ff) << 8)
 
@@ -59,13 +56,11 @@ class ArduinoSocket():
             time.sleep(0.01)
 
         def read_data(self, bus):
-
             # Read data from the bus
             time.sleep(0.01)
             return self.switch_bits(bus.read_word_data(self.address, 0))
 
         def setup(self, input, bus):
-
             # Write values to the registers
             bus.write_word_data(self.address, 0x02, self.switch_bits(input << 4))
             time.sleep(0.01)
@@ -89,7 +84,12 @@ class ArduinoSocket():
                     winch = binary[8:15]
                     switch = binary[15:16]
 
-                    states = {"rudder": (2 * (int(rudder, 2)/128.0)) - 1, "winch": (2 * (int(winch, 2)/64.0)) - 1, "switch": True if switch == '1' else False }
+                    states = {
+                        "rudder": (2 * (int(rudder, 2)/128.0)) - 1,
+                        "winch": (2 * (int(winch, 2)/64.0)) - 1,
+                        "switch": True if switch == '1' else False
+                    }
+
                     time.sleep(0.1)
 
             except IOError:
@@ -115,7 +115,7 @@ class ArduinoSocket():
                     break
                 conn.sendall(json.dumps(states).encode('utf-8'))
 
-            # close the connection if the client if the client and server connection is interfered
+            # Close the connection if the client and server connection is interfered
             conn.close()
 
         # Main loop to keep the server process going
@@ -125,7 +125,7 @@ class ArduinoSocket():
                 (conn, addr) = connection.accept()
                 logger.debug('[Arduino Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
 
-                # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
+                # Start new thread; arguments: function name to be run, the tuple of arguments to the function
                 start_new_thread(clientthread, (conn, ))
 
             except KeyboardInterrupt, socket.error:

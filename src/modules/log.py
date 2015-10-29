@@ -16,7 +16,8 @@ class WebSocketLogger(logging.Handler):
             self.listener.send_data(modules.utils.getJSON(packet))
             self.flush()
         except NameError:
-            print('The server thread has not been created yet. Dropping log output.')
+            # The server thread has not been created yet. Dropping log output.
+            pass
         except:
             self.handleError(record)
 

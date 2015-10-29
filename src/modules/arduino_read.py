@@ -38,7 +38,7 @@ class ArduinoSocket():
                 + msg[1])
             sys.exit()
 
-        logger.debug('[Arduino Socket]: Socket bind complete!')
+        logger.info('[Arduino Socket]: Socket bind complete!')
         self.start_socket_process()
 
     class ArduinoDevice(threading.Thread):
@@ -123,7 +123,7 @@ class ArduinoSocket():
             try:
                 # Wait to accept a connection in a blocking call
                 (conn, addr) = connection.accept()
-                logger.debug('[Arduino Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
+                logger.info('[Arduino Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
 
                 # Start new thread; arguments: function name to be run, the tuple of arguments to the function
                 start_new_thread(clientthread, (conn, ))

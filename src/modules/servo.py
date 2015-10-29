@@ -50,7 +50,7 @@ class ServoController():
                 + msg[1])
             sys.exit()
 
-        print '[Servo Socket]: Socket bind complete!'
+        logger.info('[Servo Socket]: Socket bind complete!')
 
         # Create a pointer to the servo class
         servo = self.Servo()
@@ -81,7 +81,7 @@ class ServoController():
             try:
                 # Wait to accept a connection in a blocking call
                 (conn, addr) = connection.accept()
-                print '[Servo Socket]: Connected with ' + addr[0] + ':' + str(addr[1])
+                logger.info('[Servo Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
 
                 # Start new thread; arguments: function name to be run, the tuple of arguments to the function
                 start_new_thread(clientthread, (conn, ))

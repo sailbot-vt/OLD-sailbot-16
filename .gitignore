@@ -54,3 +54,6 @@ target/
 
 # Eclipse
 .settings/
+
+# Chef / Vagrant configurations
+.vagrant/

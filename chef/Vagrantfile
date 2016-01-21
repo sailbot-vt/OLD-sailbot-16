@@ -2,14 +2,50 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
+  config.vm.hostname = "beaglebone-cross-compiler"
+  config.vm.box = "precise64"
 
-  config.vm.box = "ubuntu/trusty64"
+  is_vmware = !!(defined? HashiCorp)
+  if is_vmware
+    config.vm.box_url = "http://files.vagrantup.com/precise64_vmware.box"
+  else
+    config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  end
+
+  # Configure networking
+  config.vm.network "public_network"
+
+  config.ssh.forward_agent = true
+
+  # Initial Angstrom setup
+  config.vm.provision "shell", inline: <<-SCRIPT
+  set -e
+  apt-get update
+  apt-get -fy install
+  apt-get -y install git-core make gawk bitbake diffstat texinfo chrpath build-essential
+  SCRIPT
+
+  config.vm.provision "shell", privileged: false, inline: <<-SCRIPT
+  git clone git://github.com/Angstrom-distribution/setup-scripts.git
+  cd setup-scripts
+  sed -i.bak '/INHERIT.*rm_work/d' conf/local.conf
+  # angrstrom complains about /bin/sh pointing to dash
+  rm /bin/sh
+  ln -s /bin/bash /bin/sh
+  MACHINE=beaglebone ./oebb.sh config beaglebone
+  MACHINE=beaglebone ./oebb.sh update
+  MACHINE=beaglebone ./oebb.sh bitbake virtual/kernel
+  SCRIPT
+
+  # Chef configuration
   config.omnibus.chef_version = '12.4'
 
   config.vm.provision "chef_zero" do |chef|
+    chef.cookbooks_path = "../"
     chef.run_list = [
-      "recipe[vt-sailbot::default]"
+      "recipe[chef-sailbot::default]"
     ]
+    chef.log_level = "debug"
   end
 
 end

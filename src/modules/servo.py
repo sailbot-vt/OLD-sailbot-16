@@ -6,10 +6,9 @@ from utils import setup_logging
 class ServoController():
     class Servo():
         def blink(self, angle, pin, scale_factor, zero_point, ticks):
-            a = (((angle)/180.0) * scale_factor + zero_point)/1000.0
+            a = (((angle)/180.0) * scale_factor + zero_point) / 1000.0
 
             for i in range(0, ticks):
-
                 GPIO.output(pin, True)
                 time.sleep(a)
 
@@ -51,7 +50,7 @@ class ServoController():
                 + msg[1])
             sys.exit()
 
-        print '[Servo Socket]: Socket bind complete!'
+        logger.info('[Servo Socket]: Socket bind complete!')
 
         # Create a pointer to the servo class
         servo = self.Servo()
@@ -74,7 +73,7 @@ class ServoController():
                 except ValueError:
                    logger.critical('[Servo Socket]: Recieved extraneous angle value: %s' % data)
 
-            # Close the connection if the client if the client and server connection is interfered
+            # Close the connection if the client and server connection is interfered
             conn.close()
 
         # Main loop to keep the server process going
@@ -82,9 +81,9 @@ class ServoController():
             try:
                 # Wait to accept a connection in a blocking call
                 (conn, addr) = connection.accept()
-                print '[Servo Socket]: Connected with ' + addr[0] + ':' + str(addr[1])
+                logger.info('[Servo Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
 
-                # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
+                # Start new thread; arguments: function name to be run, the tuple of arguments to the function
                 start_new_thread(clientthread, (conn, ))
 
             except KeyboardInterrupt, socket.error:

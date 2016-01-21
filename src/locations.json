@@ -1,30 +1,30 @@
-{  
-   "target_locations":[  
-      {  
-         "latitude":37.047730,
-         "longitude":-79.632898
+{
+   "target_locations":[
+      {
+         "latitude": 37.047730,
+         "longitude": -79.632898
       },
-      {  
-         "latitude":37.051840,
-         "longitude":-79.648348
+      {
+         "latitude": 37.051840,
+         "longitude": -79.648348
       }
    ],
-   "boundary_locations":[  
-      {  
-         "latitude":37.052456,
-         "longitude":-79.638820
+   "boundary_locations":[
+      {
+         "latitude": 37.052456,
+         "longitude": -79.638820
       },
-      {  
-         "latitude":37.052765,
-         "longitude":-79.636889
+      {
+         "latitude": 37.052765,
+         "longitude": -79.636889
       },
-      {  
-         "latitude":37.052285,
-         "longitude":-79.635130
+      {
+         "latitude": 37.052285,
+         "longitude": -79.635130
       },
-      {  
-         "latitude":37.051532,
-         "longitude":-79.634143
+      {
+         "latitude": 37.051532,
+         "longitude": -79.634143
       }
    ]
 }

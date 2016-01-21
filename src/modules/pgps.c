@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 // Socket specific libraries
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -38,7 +38,7 @@ void error(const char *msg) {
 }
 
 int main(int argc, char *argv[]) {
-    printf("[GPS Socket]: Starting the GPS Socket\n");
+    printf("[GPS Socket]: Starting the GPS Socketn");
 
     // Close GPS in case of prior inproper shutdown
     gps_close(&gpsdata);

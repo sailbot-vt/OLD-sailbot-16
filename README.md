@@ -10,26 +10,3 @@ The majority of code for SailBOT is written in Python due to vast library suppor
 
 The goal of the project is to build upon the SailBOT foundation laid in previous years. It should be extensible, modular, verbose, and minimalistic.
 
-## Installation and Setup
-
-To configure the Raspberry Pi, simply clone this repository and launch the setup script from the terminal:
-
-    sh setup.sh
-
-SailBOT requires the following dependencies and packages:
-
- 1. Raspberry Pi running the latest version of [Raspbian](http://downloads.raspberrypi.org/raspbian_latest)
- 2. [Tornado](http://www.tornadoweb.org/en/stable/) web server
- 3. I2C and SMBus
- 5. [GPSD](http://www.catb.org/gpsd/)
-
-> Note: running the setup script will modify the Raspberry Pi's system files to support I2C and lower-level hardware
-
-## Deployment
-
-To run SailBOT, simply start `launch.sh`. This script will start various separate processes including the main program and GPDS, wind sensor, and servo controllers over various TCP sockets. 
-
-Pull requests and feature suggestions are welcome.
-
-
-

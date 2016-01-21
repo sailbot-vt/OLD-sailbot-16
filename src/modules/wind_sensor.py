@@ -33,7 +33,7 @@ class WindSocket():
                 + msg[1])
             sys.exit()
 
-        logger.debug('[Wind Sensor Socket]: Socket bind complete!')
+        logger.info('[Wind Sensor Socket]: Socket bind complete!')
 
         self.start_socket_process()
 
@@ -122,9 +122,9 @@ class WindSocket():
             try:
                 # Wait to accept a connection in a blocking call
                 (conn, addr) = connection.accept()
-                logger.debug('[Wind Sensor Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
+                logger.info('[Wind Sensor Socket]: Connected with ' + addr[0] + ':' + str(addr[1]))
 
-                # Start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function
+                # Start new thread; arguments: function name to be run, the tuple of arguments to the function
                 start_new_thread(clientthread, (conn, ))
 
             except KeyboardInterrupt, socket.error:

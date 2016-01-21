@@ -3,39 +3,49 @@
 # Recipe:: default
 #
 
-include_recipe 'apt'
-
 # Installs the core SailBOT packages / dependencies
 package [
   'build-essential',
   'python3-dev',
-  'gpsd',
-  'gpsd-clients',
-  'python-gps',
-  'i2c-tools',
+  'python-dev',
+  'python-setuptools',
   'python-smbus',
-  'python3-pip',
-  'libgps-dev'
+  'python-pip'
   ]  do
   action :install
 end
 
+# Update the system clock
+bash 'Update system clock' do
+  code <<-EOH
+    /usr/bin/ntpdate -b -s -u pool.ntp.org;
+    EOH
+end
+
 # Installs optional, depencency packages
 if node.chef_environment == "dev"
-  package ['telnet']  do
+  package ['telnet', 'tree', 'vim']  do
     action :install
   end
 
   bash 'Install IPython' do
-    code <<-EOH
-      sudo pip3 install ipython
-      EOH
+    code <<-SCRIPT
+      sudo pip3 install ipython;
+      SCRIPT
   end
 end
 
 # Installs the web server
 bash 'Install Tornado Web Server' do
-  code <<-EOH
-    sudo pip3 install tornado
-    EOH
+  code <<-SCRIPT
+    sudo pip3 install tornado;
+    SCRIPT
+end
+
+# Installs Adafruit Servo packages
+bash 'Install Adafruit Servo packages' do
+  code <<-SCRIPT
+    sudo pip3 install Adafruit_BBIO;
+    sudo pip install Adafruit_BBIO;
+    SCRIPT
 end

@@ -1,7 +1,5 @@
-#!/usr/bin/python
 import math
-
-point_proximity_radius = 5
+import ship_data
 
 def direction_to_point(current_point, target_point):
     a = math.radians(current_point['latitude'])
@@ -18,8 +16,8 @@ def get_heading_angle(heading, current_point, target_point):
 
     return heading - angle
 
-def point_proximity(current_point, target_point):
-    return (distance(current_point, target_point) <= point_proximity_radius)
+def within_radius_of_target(current_point, target_point):
+    return (distance(current_point, target_point) <= ship_data.point_proximity_radius)
 
 def distance(point1, point2):
     a = math.sin(math.radians(point1['latitude']))

@@ -1,26 +1,6 @@
 #!/usr/bin/python
 import logging, modules.utils, curses
 
-class WebSocketLogger(logging.Handler):
-    def __init__(self, listener):
-        super().__init__()
-        self.listener = listener
-
-    def emit(self, record):
-        try:
-            packet = {
-                'category': 'log',
-                'message': self.format(record),
-                'type': record.levelno
-            }
-            self.listener.send_data(modules.utils.getJSON(packet))
-            self.flush()
-        except NameError:
-            # The server thread has not been created yet. Dropping log output.
-            pass
-        except:
-            self.handleError(record)
-
 class CursesHandler(logging.Handler):
     def __init__(self, screen):
         logging.Handler.__init__(self)

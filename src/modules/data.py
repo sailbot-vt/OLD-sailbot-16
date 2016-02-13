@@ -1,10 +1,8 @@
 
 import socket, logging, json, time
 
-from .log import WebSocketLogger
 from .utils import getJSON
 from .control_thread import StoppableThread
-from .server import ServerThread
 from .utils import SocketType, socket_connect
 from contextlib import contextmanager
 
@@ -22,22 +20,12 @@ def query(socket):
 
 class DataThread(StoppableThread):
 
-    server_thread = rudder_sock = winch_sock = None
+    rudder_sock = winch_sock = None
 
     def __init__(self, *args, **kwargs):
         super(DataThread, self).__init__(*args, **kwargs)
         global server_thread, rudder_sock, winch_sock
 
-        server_thread = ServerThread(
-            name = 'Server',
-            kwargs = {
-                'port': self._kwargs['values']['port'],
-                'target_locations': self._kwargs['values']['target_locations'],
-                'boundary_locations': self._kwargs['values']['boundary_locations']
-                }
-            )
-
-        server_thread.start()
         rudder_sock = socket_connect(SocketType.rudder)
         winch_sock = socket_connect(SocketType.winch)
 
@@ -71,6 +59,5 @@ class DataThread(StoppableThread):
                 if not parsed == '':
                     data['wind_dir'] = parsed
 
-            server_thread.send_data(getJSON(data))
             logger.debug('Data sent to the server %s' % json.dumps(json.loads(getJSON(data))))
             time.sleep(self._kwargs['values']['transmission_delay'])
